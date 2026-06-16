@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { GlassCard } from '../../components/GlassCard';
 import { Search, ChevronDown, Plus, Upload } from 'lucide-react-native';
+import { AdminStaffHeader } from '../../components/AdminStaffHeader';
 
 const SUBJECT_COLORS = {
   Physics: { bg: 'bg-indigo-950/60', border: 'border-indigo-500/30', text: 'text-indigo-200' },
@@ -43,11 +44,11 @@ export const TimetableBuilderScreen: React.FC<any> = ({ navigation }) => {
         end={{ x: 0, y: 1 }}
         style={StyleSheet.absoluteFillObject}
       />
-      <AdminStaffHeader 
+      <AdminStaffHeader
         title="Admin Panel"
         icon={
-          <Image 
-            source={{ uri: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150' }} 
+          <Image
+            source={{ uri: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150' }}
             className="w-8 h-8 rounded-full border border-emerald-500/30"
           />
         }
