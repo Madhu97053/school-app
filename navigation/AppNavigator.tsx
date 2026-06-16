@@ -10,7 +10,7 @@ import {
   Home, Bell, Calendar, User, MessageCircle, 
   School, Banknote, Bus, ClipboardCheck, 
   ClipboardList, Star, CalendarOff, Users, 
-  BarChart, Megaphone, Settings 
+  BarChart, Megaphone, Settings, FileText 
 } from 'lucide-react-native';
 
 // Auth Screens
@@ -67,13 +67,14 @@ import FeeStructureScreen from '../screens/guest/FeeStructureScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const getTabOptions = (icon: any, activeColor: string) => ({
+const getTabOptions = (icon: any, activeColor: string, title?: string) => ({
   tabBarIcon: ({ color, size }: { color: string; size: number }) => {
     const IconComponent = icon;
     return <IconComponent size={size} color={color} />;
   },
   tabBarActiveTintColor: activeColor,
-  headerShown: false, // We'll build custom headers in the screens
+  headerShown: false,
+  ...(title ? { title } : {}),
 });
 
 // Role-Specific Tab Navigators
@@ -101,6 +102,7 @@ const TeacherTabs = () => (
   <Tab.Navigator tabBar={(props) => <CustomTabBar {...props} />} screenOptions={{ tabBarHideOnKeyboard: true }}>
     <Tab.Screen name="Dashboard" component={TeacherDashboard} options={getTabOptions(Home, '#ddb7ff')} />
     <Tab.Screen name="Attendance" component={AttendanceMarkingScreen} options={getTabOptions(ClipboardCheck, '#ddb7ff')} />
+    <Tab.Screen name="DailyDiary" component={DailyDiaryScreen} options={getTabOptions(FileText, '#ddb7ff', 'Daily Diary')} />
     <Tab.Screen name="Homework" component={HomeworkAssignmentsScreen} options={getTabOptions(ClipboardList, '#ddb7ff')} />
     <Tab.Screen name="Marks" component={MarksEntryScreen} options={getTabOptions(Star, '#ddb7ff')} />
     <Tab.Screen name="Leave" component={LeaveApplicationScreen} options={getTabOptions(CalendarOff, '#ddb7ff')} />

@@ -1,165 +1,208 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, Platform, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassCard } from '../../components/GlassCard';
-import { AdminStaffHeader } from '../../components/AdminStaffHeader';
-import { Search, MapPin, Phone, MessageSquare, Trophy, TrendingUp, BookOpen, User, Star, Award, TrendingDown, Minus } from 'lucide-react-native';
+import { Bell, ChevronDown, AlertTriangle, Lightbulb, TrendingUp, Mail } from 'lucide-react-native';
 
-export const StudentPerformanceScreen: React.FC<any> = ({ navigation }) => {
-  const [activeTab, setActiveTab] = useState('Overview');
-
-  const tabs = ['Overview', 'Attendance', 'Fees', 'Documents'];
-
+export const StudentPerformanceScreen: React.FC = () => {
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#0d2a24', '#121414']}
-        start={{ x: 1, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={StyleSheet.absoluteFillObject}
-      />
-      <AdminStaffHeader 
-        onBackPress={() => navigation.goBack()}
-        title="Admin Panel"
-        icon={
-          <Image 
-            source={{ uri: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150' }} 
-            className="w-8 h-8 rounded-full border border-emerald-500/30"
-          />
-        }
-        rightAction={
-          <Pressable>
-            <Search size={24} color="#34D399" />
-          </Pressable>
-        }
-      />
+      <View className="absolute inset-0 bg-[#150E22]" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <View className="flex-row items-center">
+          <View className="w-10 h-10 rounded-full border border-[#ddb7ff] p-0.5 items-center justify-center bg-[#1a1525]">
+            <Image 
+              source={{ uri: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150' }} 
+              className="w-full h-full rounded-full"
+            />
+          </View>
+          <Text className="text-[#ddb7ff] text-2xl font-bold ml-3 tracking-tight">EduCommand</Text>
+        </View>
+        <Pressable className="w-10 h-10 rounded-xl items-center justify-center bg-white/5 border border-white/10">
+          <Bell size={20} color="#EABFFF" />
+        </Pressable>
+      </View>
 
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Profile Header */}
-        <View className="items-center mb-8 mt-4">
-          <View className="relative mb-6">
-            <View className="w-36 h-36 rounded-full border-4 border-[#00f1a1] p-1.5 shadow-[0_0_30px_rgba(0,241,161,0.5)] items-center justify-center bg-[#101415]">
-              <Image 
-                source={{ uri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300' }} 
-                className="w-full h-full rounded-full opacity-80"
-              />
-            </View>
-            <View className="absolute -bottom-3 right-4">
-              <View className="bg-[#00f1a1] px-3 py-1 rounded-full shadow-lg shadow-[#00f1a1]/50">
-                <Text className="text-[#101415] font-bold text-xs tracking-wider">ACTIVE</Text>
-              </View>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        
+        {/* Title */}
+        <View className="mb-6">
+          <Text className="text-white text-[32px] font-extrabold tracking-tight mb-2">Student Performance</Text>
+          <Text className="text-[#A1A1AA] text-sm">Deep dive into individual academic metrics and trends.</Text>
+        </View>
+
+        {/* Student Selector */}
+        <View className="bg-[#2a1b4e]/80 border border-[#ddb7ff]/20 rounded-2xl px-5 py-3 flex-row justify-between items-center mb-8 shadow-lg">
+          <View className="flex-row items-center">
+            <Image 
+              source={{ uri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150' }} 
+              className="w-10 h-10 rounded-full mr-4 border border-[#ddb7ff]/30"
+            />
+            <View>
+              <Text className="text-[#EABFFF] text-[10px] font-bold tracking-widest uppercase mb-0.5">SELECT STUDENT</Text>
+              <Text className="text-white font-bold text-base">Julian Sterling</Text>
             </View>
           </View>
-          <Text className="text-white text-3xl font-bold mb-3">Julian Voss</Text>
-          <View className="flex-row space-x-3">
-            <View className="bg-[#101415] border border-[#00f1a1]/30 px-4 py-1.5 rounded-full">
-              <Text className="text-[#00f1a1] text-xs font-semibold">Class 3-B</Text>
+          <ChevronDown size={20} color="#EABFFF" />
+        </View>
+
+        {/* Subject Mastery */}
+        <View className="bg-[#1e1136] border border-white/5 rounded-[32px] p-6 mb-8 shadow-lg">
+          <View className="flex-row justify-between items-center mb-8">
+            <View>
+              <Text className="text-white text-2xl font-bold mb-1">Subject Mastery</Text>
+              <Text className="text-[#A1A1AA] text-[10px] font-bold tracking-widest uppercase">CURRENT SEMESTER SCORE %</Text>
             </View>
-            <View className="bg-[#101415] border border-white/20 px-4 py-1.5 rounded-full">
-              <Text className="text-white/70 text-xs font-semibold">ID: EV-2024-8831</Text>
+            <View className="bg-white/10 border border-white/5 px-4 py-1.5 rounded-full flex-row items-center">
+              <View className="w-1.5 h-1.5 rounded-full bg-[#EABFFF] mr-2 shadow-[0_0_8px_#EABFFF]" />
+              <Text className="text-[#EABFFF] text-[10px] font-bold">Live Data</Text>
+            </View>
+          </View>
+
+          <View className="flex-row justify-between items-end h-40 mt-4 px-2">
+            {[
+              { label: 'MATH', height: '90%' },
+              { label: 'PHYS', height: '65%' },
+              { label: 'BIOL', height: '80%' },
+              { label: 'HIST', height: '45%' },
+              { label: 'LIT', height: '85%' },
+              { label: 'CHEM', height: '60%' },
+            ].map((item, index) => (
+              <View key={index} className="items-center w-[12%]">
+                <View className="w-full bg-[#150E22]/80 rounded-t-xl overflow-hidden" style={{ height: 120, justifyContent: 'flex-end' }}>
+                  <View style={{ width: '100%', height: item.height as any, borderTopLeftRadius: 12, borderTopRightRadius: 12, backgroundColor: '#EABFFF' }} />
+                </View>
+                <Text className="text-white/80 text-[10px] font-bold mt-4">{item.label}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Rank Trend */}
+        <View className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-6 mb-8 shadow-lg overflow-hidden relative">
+          <Text className="text-white text-2xl font-bold mb-1">Rank Trend</Text>
+          <Text className="text-[#A1A1AA] text-[10px] font-bold tracking-widest uppercase mb-8">GLOBAL CLASSROOM POSITION</Text>
+          
+          {/* Mock Chart Area */}
+          <View className="h-28 mb-4 justify-center relative">
+            <View className="absolute inset-x-0 top-1/2 h-[3px] bg-[#EABFFF] rounded-full shadow-[0_0_12px_#EABFFF]" style={{ elevation: 10, shadowColor: '#EABFFF', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 8 }} />
+            <View className="flex-row justify-between items-center h-full pt-4 relative">
+              <View className="w-3 h-3 rounded-full bg-[#EABFFF] border-[3px] border-[#1C1C1E] z-10" style={{ transform: [{ translateY: 15 }] }} />
+              <View className="w-3 h-3 rounded-full bg-[#EABFFF] border-[3px] border-[#1C1C1E] z-10" style={{ transform: [{ translateY: -5 }] }} />
+              <View className="w-3 h-3 rounded-full bg-[#EABFFF] border-[3px] border-[#1C1C1E] z-10" style={{ transform: [{ translateY: 20 }] }} />
+              <View className="w-3.5 h-3.5 rounded-full bg-white border-[3px] border-[#1C1C1E] shadow-[0_0_16px_#fff] z-10" style={{ transform: [{ translateY: -20 }] }} />
+            </View>
+          </View>
+
+          <View className="flex-row justify-between mb-8 px-1">
+            <Text className="text-[#A1A1AA] text-xs font-bold">Ex. 01</Text>
+            <Text className="text-[#A1A1AA] text-xs font-bold">Ex. 02</Text>
+            <Text className="text-[#A1A1AA] text-xs font-bold">Ex. 03</Text>
+            <Text className="text-white/60 text-xs font-bold">Latest</Text>
+          </View>
+
+          <View className="flex-row justify-between items-end border-t border-white/5 pt-5 mt-2">
+            <View>
+              <Text className="text-[#A1A1AA] text-sm mb-1">Current Rank</Text>
+              <Text className="text-[#EABFFF] text-3xl font-bold">#04</Text>
+            </View>
+            <View className="bg-[#10b981]/20 border border-[#10b981]/30 px-4 py-1.5 rounded-full flex-row items-center">
+              <TrendingUp size={14} color="#10b981" className="mr-1" />
+              <Text className="text-[#10b981] text-xs font-bold">+2</Text>
             </View>
           </View>
         </View>
 
-        {/* Tabs */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6 pl-1" contentContainerStyle={{ paddingRight: 20 }}>
-          {tabs.map((tab) => (
-            <Pressable 
-              key={tab} 
-              onPress={() => setActiveTab(tab)}
-              className={`mr-3 px-5 py-2.5 rounded-xl ${activeTab === tab ? 'bg-[#46f1c5]' : 'bg-transparent border border-white/10'}`}
-            >
-              <Text className={`${activeTab === tab ? 'text-[#101415] font-bold' : 'text-white/70 font-semibold'}`}>{tab}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-
-        {/* Overview Tab Content */}
-        {activeTab === 'Overview' && (
-          <View className="gap-y-3">
-            <View className="flex-row space-x-3">
-              <GlassCard intensity="low" className="flex-1 p-4">
-                <Text className="text-white/60 text-xs mb-1">DOB</Text>
-                <Text className="text-white text-base font-semibold">14 May 2012</Text>
-              </GlassCard>
-              <GlassCard intensity="low" className="flex-1 p-4">
-                <Text className="text-white/60 text-xs mb-1">Admission Date</Text>
-                <Text className="text-white text-base font-semibold">02 Jan 2024</Text>
-              </GlassCard>
+        {/* Benchmarking */}
+        <View className="flex-row justify-between items-center mb-6 mt-4">
+          <Text className="text-white text-[28px] font-bold tracking-tight">Benchmarking</Text>
+          <View className="flex-row">
+            <View className="flex-row items-center mr-4">
+              <View className="w-2 h-2 rounded-full bg-[#10b981] mr-1.5" />
+              <Text className="text-white font-bold text-xs">Above</Text>
             </View>
-
-            <View className="flex-row space-x-3">
-              <GlassCard intensity="low" className="flex-1 p-4">
-                <Text className="text-white/60 text-xs mb-1">Blood Group</Text>
-                <Text className="text-emerald-400 text-base font-semibold">A+ Pos</Text>
-              </GlassCard>
-              <GlassCard intensity="low" className="flex-1 p-4">
-                <Text className="text-white/60 text-xs mb-1">House</Text>
-                <Text className="text-white text-base font-semibold">Emerald</Text>
-              </GlassCard>
+            <View className="flex-row items-center">
+              <View className="w-2 h-2 rounded-full bg-[#f87171] mr-1.5" />
+              <Text className="text-white font-bold text-xs">Below</Text>
             </View>
-
-            <GlassCard intensity="low" className="p-4 mt-2">
-              <View className="flex-row items-center mb-2">
-                <MapPin size={16} color="#A1A1AA" />
-                <Text className="text-white/60 text-xs ml-2">Current Address</Text>
-              </View>
-              <Text className="text-white/90 text-sm leading-6">
-                42 Quantum Heights, Silicon Valley District,{"\n"}EdTech City, 94043
-              </Text>
-            </GlassCard>
-
-            <GlassCard intensity="low" className="p-5 mt-2">
-              <Text className="text-white/60 text-xs font-semibold tracking-wider mb-4 uppercase">Parent Contact</Text>
-              
-              <View className="flex-row justify-between items-center mb-4 border-b border-white/5 pb-4">
-                <View>
-                  <Text className="text-white text-base font-semibold mb-0.5">Marcus Voss</Text>
-                  <Text className="text-white/50 text-xs">Primary Guardian</Text>
-                </View>
-                <View className="flex-row space-x-2">
-                  <Pressable className="w-10 h-10 rounded-full border border-white/10 items-center justify-center bg-white/5 mr-2">
-                    <Phone size={18} color="#34D399" />
-                  </Pressable>
-                  <Pressable className="w-10 h-10 rounded-full border border-white/10 items-center justify-center bg-white/5">
-                    <MessageSquare size={18} color="#34D399" />
-                  </Pressable>
-                </View>
-              </View>
-
-              <View className="flex-row justify-between items-center">
-                <View>
-                  <Text className="text-white text-base font-semibold mb-0.5">Elena Voss</Text>
-                  <Text className="text-white/50 text-xs">Secondary Guardian</Text>
-                </View>
-                <View className="flex-row space-x-2">
-                  <Pressable className="w-10 h-10 rounded-full border border-white/10 items-center justify-center bg-white/5 mr-2">
-                    <Phone size={18} color="#34D399" />
-                  </Pressable>
-                  <Pressable className="w-10 h-10 rounded-full border border-white/10 items-center justify-center bg-white/5">
-                    <MessageSquare size={18} color="#34D399" />
-                  </Pressable>
-                </View>
-              </View>
-            </GlassCard>
-
-            <GlassCard intensity="low" className="p-5 mt-2 border-l-4 border-l-emerald-400">
-              <View className="flex-row justify-between items-end">
-                <View>
-                  <Text className="text-white/60 text-xs mb-2">Academic Performance</Text>
-                  <Text className="text-emerald-400 text-4xl font-bold tracking-tighter">88.4%</Text>
-                </View>
-                <View className="items-end">
-                  <Text className="text-white/60 text-xs mb-1">Rank</Text>
-                  <Text className="text-white text-xl font-bold">4th <Text className="text-white/50 text-base">/ 32</Text></Text>
-                </View>
-              </View>
-            </GlassCard>
           </View>
-        )}
+        </View>
+
+        <View className="flex-row flex-wrap justify-between mb-8">
+          {[
+            { subject: 'Mathematics', val: '+12%', type: 'Above Avg' },
+            { subject: 'Physics', val: '+05%', type: 'Above Avg' },
+            { subject: 'History', val: '-08%', type: 'Below Avg' },
+            { subject: 'Biology', val: '+02%', type: 'Above Avg' },
+            { subject: 'Literature', val: '+18%', type: 'Above Avg' },
+            { subject: 'Chemistry', val: '-04%', type: 'Below Avg' },
+          ].map((item, index) => {
+            const isAbove = item.type === 'Above Avg';
+            return (
+              <View key={index} className="w-[48%] bg-[#1A1A1A] border border-white/5 rounded-2xl p-5 mb-4 shadow-lg">
+                <Text className="text-white/90 text-sm mb-4 font-medium">{item.subject}</Text>
+                <View className="flex-row items-center">
+                  <Text className="text-white text-xl font-bold mr-2">{item.val}</Text>
+                  <View className={`px-2 py-1 rounded-md ${isAbove ? 'bg-[#10b981]/20' : 'bg-[#f87171]/20'}`}>
+                    <Text className={`text-[10px] font-bold ${isAbove ? 'text-[#10b981]' : 'text-[#f87171]'}`}>{item.type}</Text>
+                  </View>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
+        {/* Priority: History */}
+        <View className="bg-[#1A1A1A] border-2 border-[#f97316]/50 rounded-[32px] p-6 mb-6 relative overflow-hidden">
+          {/* Faint alert icon in background */}
+          <View className="absolute -right-4 -top-4 opacity-[0.03]">
+            <AlertTriangle size={140} color="#f97316" />
+          </View>
+          
+          <View className="flex-row items-center mb-5">
+            <AlertTriangle size={24} color="#f97316" />
+            <Text className="text-white text-lg font-bold ml-3">Priority: History</Text>
+          </View>
+          
+          <Text className="text-[#A1A1AA] text-[15px] leading-relaxed mb-6">
+            Julian is struggling with chronological timelines and cause-effect analysis in 19th-century modules.
+          </Text>
+
+          <Text className="text-[#A1A1AA] text-[10px] font-bold tracking-widest uppercase mb-3">SUGGESTED ACTION</Text>
+          <View className="bg-[#2a2a35] border border-transparent rounded-2xl p-5 mb-6">
+            <Text className="text-[#A1A1AA] text-sm italic leading-relaxed">
+              "Schedule a 15-minute sync to review the Napoleonic Era mind-map. Assign visual timeline exercises for homework."
+            </Text>
+          </View>
+
+          <Pressable className="bg-[#f97316]/10 border border-[#f97316]/30 flex-row items-center justify-center py-4 rounded-xl">
+            <Mail size={18} color="#f97316" />
+            <Text className="text-[#f97316] font-bold text-base ml-2">Nudge Guardian</Text>
+          </Pressable>
+        </View>
+
+        {/* Progress Note: Chemistry */}
+        <View className="bg-[#1A1A1A] border-2 border-[#EABFFF]/30 rounded-[32px] p-6 mb-8 relative overflow-hidden">
+          <View className="absolute -right-4 -bottom-4 opacity-[0.03]">
+            <Lightbulb size={140} color="#EABFFF" />
+          </View>
+          
+          <View className="flex-row items-center mb-5">
+            <Lightbulb size={24} color="#EABFFF" />
+            <Text className="text-white text-lg font-bold ml-3">Progress Note: Chemistry</Text>
+          </View>
+          
+          <Text className="text-[#A1A1AA] text-[15px] leading-relaxed mb-6">
+            Steady improvement in stoichiometric calculations, but conceptual gaps remain in organic bonding.
+          </Text>
+
+          <View className="bg-[#2a2a35] border border-transparent rounded-2xl p-5 flex-row justify-between items-center">
+            <Text className="text-[#A1A1AA] text-sm font-medium">Interactive Quiz Score</Text>
+            <Text className="text-[#EABFFF] text-lg font-bold">74%</Text>
+          </View>
+        </View>
+
         <View style={{ height: 100 }} />
       </ScrollView>
     </View>
@@ -169,6 +212,7 @@ export const StudentPerformanceScreen: React.FC<any> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#150E22',
   },
   header: {
     flexDirection: 'row',
@@ -177,11 +221,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
 });
 
