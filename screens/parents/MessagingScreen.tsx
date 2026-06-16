@@ -45,7 +45,7 @@ export const MessagingScreen: React.FC<{ navigation: any; route: any }> = ({ nav
     >
       <View style={styles.container} className="flex-1">
         {/* Chat Header */}
-        <View className="flex-row items-center justify-between px-5 py-4 border-b border-white/5 bg-brand-darkNavy">
+        <View style={{ paddingTop: Platform.OS === 'ios' ? 60 : 40 }} className="flex-row items-center justify-between px-5 pb-4 border-b border-white/5 bg-brand-darkNavy">
           <View className="flex-row items-center">
             <Pressable onPress={() => navigation.goBack()} className="p-2 bg-white/5 rounded-xl mr-3">
               <ArrowLeft size={18} color="#FFFFFF" />
@@ -87,7 +87,7 @@ export const MessagingScreen: React.FC<{ navigation: any; route: any }> = ({ nav
         </ScrollView>
 
         {/* Input Bar */}
-        <View className="flex-row items-center px-4 py-3 border-t border-white/5 bg-brand-darkNavy">
+        <View style={{ paddingBottom: Platform.OS === 'ios' ? 24 : 16 }} className="flex-row items-center px-4 pt-3 border-t border-white/5 bg-brand-darkNavy">
           <Pressable className="p-3 bg-white/5 rounded-full mr-2">
             <Paperclip size={18} color="#FFFFFF" />
           </Pressable>

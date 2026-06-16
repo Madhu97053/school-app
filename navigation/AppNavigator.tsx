@@ -117,73 +117,74 @@ const ParentTabs = () => (
   </Tab.Navigator>
 );
 
+const RoleStackComponent = () => {
+  const { user } = useAuthStore();
+  if (!user) return null;
+  
+  let initialRoute = "GuestHome";
+  let mainComponent: React.ComponentType<any> = GuestDashboard;
+
+  switch (user.role) {
+    case 'super_admin':
+      initialRoute = "SuperAdminHome";
+      mainComponent = SuperAdminTabs;
+      break;
+    case 'admin_staff':
+      initialRoute = "AdminStaffHome";
+      mainComponent = AdminStaffTabs;
+      break;
+    case 'teacher':
+      initialRoute = "TeacherHome";
+      mainComponent = TeacherTabs;
+      break;
+    case 'parent':
+      initialRoute = "ParentHome";
+      mainComponent = ParentTabs;
+      break;
+    case 'guest':
+      initialRoute = "GuestHome";
+      mainComponent = GuestDashboard; // Using Guest Dashboard stack directly (no tabs)
+      break;
+  }
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
+      <Stack.Screen name={initialRoute} component={mainComponent} />
+      {/* Remaining Feature Screens */}
+      <Stack.Screen name="FeePayment" component={FeePaymentScreen} />
+      <Stack.Screen name="ReportCard" component={ReportCardScreen} />
+      <Stack.Screen name="BusTracking" component={BusTrackingScreen} />
+      <Stack.Screen name="Messaging" component={MessagingScreen} />
+      <Stack.Screen name="TeacherCommunication" component={MessagingScreen} />
+      <Stack.Screen name="EnquiryLeads" component={EnquiryLeadsScreen} />
+      <Stack.Screen name="StudentPerformance" component={StudentPerformanceScreen} />
+      <Stack.Screen name="SubstitutionManagement" component={SubstitutionManagementScreen} />
+      <Stack.Screen name="LeaveApplication" component={LeaveApplicationScreen} />
+      <Stack.Screen name="AnalyticsDashboard" component={AnalyticsDashboardScreen} />
+      <Stack.Screen name="DailyDiary" component={DailyDiaryScreen} />
+      <Stack.Screen name="HomeworkAssignments" component={HomeworkAssignmentsScreen} />
+      <Stack.Screen name="AdmissionsInfo" component={AdmissionsInfoScreen} />
+      <Stack.Screen name="AchievementsGallery" component={AchievementsGalleryScreen} />
+      <Stack.Screen name="FeeCollection" component={FeeCollectionScreen} />
+      <Stack.Screen name="FeeStructure" component={FeeStructureScreen} />
+      <Stack.Screen name="EnquiryForm" component={EnquiryFormScreen} />
+      <Stack.Screen name="TimetableBuilder" component={TimetableBuilderScreen} />
+      <Stack.Screen name="SchoolFacilities" component={SchoolFacilitiesScreen} />
+      <Stack.Screen name="AttendanceMarking" component={AttendanceMarkingScreen} />
+      <Stack.Screen name="MarksEntry" component={MarksEntryScreen} />
+      <Stack.Screen name="UserManagement" component={UserManagementScreen} />
+      <Stack.Screen name="LeaveApprovals" component={LeaveApprovalsScreen} />
+      <Stack.Screen name="ExamSchedule" component={ExamScheduleScreen} />
+      <Stack.Screen name="SalaryExpenses" component={SalaryExpensesScreen} />
+      <Stack.Screen name="PortalTools" component={PortalToolsScreen} />
+      <Stack.Screen name="FacultyShowcase" component={FacultyShowcaseScreen} />
+      <Stack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} />
+    </Stack.Navigator>
+  );
+};
+
 export const AppNavigator: React.FC = () => {
-  const { isAuthenticated, user } = useAuthStore();
-
-  const renderRoleStack = () => {
-    if (!user) return null;
-    
-    let initialRoute = "GuestHome";
-    let mainComponent: React.ComponentType<any> = GuestDashboard;
-
-    switch (user.role) {
-      case 'super_admin':
-        initialRoute = "SuperAdminHome";
-        mainComponent = SuperAdminTabs;
-        break;
-      case 'admin_staff':
-        initialRoute = "AdminStaffHome";
-        mainComponent = AdminStaffTabs;
-        break;
-      case 'teacher':
-        initialRoute = "TeacherHome";
-        mainComponent = TeacherTabs;
-        break;
-      case 'parent':
-        initialRoute = "ParentHome";
-        mainComponent = ParentTabs;
-        break;
-      case 'guest':
-        initialRoute = "GuestHome";
-        mainComponent = GuestDashboard; // Using Guest Dashboard stack directly (no tabs)
-        break;
-    }
-
-    return (
-      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
-        <Stack.Screen name={initialRoute} component={mainComponent} />
-        {/* Remaining Feature Screens */}
-        <Stack.Screen name="FeePayment" component={FeePaymentScreen} />
-        <Stack.Screen name="ReportCard" component={ReportCardScreen} />
-        <Stack.Screen name="BusTracking" component={BusTrackingScreen} />
-        <Stack.Screen name="Messaging" component={MessagingScreen} />
-        <Stack.Screen name="TeacherCommunication" component={MessagingScreen} />
-        <Stack.Screen name="EnquiryLeads" component={EnquiryLeadsScreen} />
-        <Stack.Screen name="StudentPerformance" component={StudentPerformanceScreen} />
-        <Stack.Screen name="SubstitutionManagement" component={SubstitutionManagementScreen} />
-        <Stack.Screen name="LeaveApplication" component={LeaveApplicationScreen} />
-        <Stack.Screen name="AnalyticsDashboard" component={AnalyticsDashboardScreen} />
-        <Stack.Screen name="DailyDiary" component={DailyDiaryScreen} />
-        <Stack.Screen name="HomeworkAssignments" component={HomeworkAssignmentsScreen} />
-        <Stack.Screen name="AdmissionsInfo" component={AdmissionsInfoScreen} />
-        <Stack.Screen name="AchievementsGallery" component={AchievementsGalleryScreen} />
-        <Stack.Screen name="FeeCollection" component={FeeCollectionScreen} />
-        <Stack.Screen name="FeeStructure" component={FeeStructureScreen} />
-        <Stack.Screen name="EnquiryForm" component={EnquiryFormScreen} />
-        <Stack.Screen name="TimetableBuilder" component={TimetableBuilderScreen} />
-        <Stack.Screen name="SchoolFacilities" component={SchoolFacilitiesScreen} />
-        <Stack.Screen name="AttendanceMarking" component={AttendanceMarkingScreen} />
-        <Stack.Screen name="MarksEntry" component={MarksEntryScreen} />
-        <Stack.Screen name="UserManagement" component={UserManagementScreen} />
-        <Stack.Screen name="LeaveApprovals" component={LeaveApprovalsScreen} />
-        <Stack.Screen name="ExamSchedule" component={ExamScheduleScreen} />
-        <Stack.Screen name="SalaryExpenses" component={SalaryExpensesScreen} />
-        <Stack.Screen name="PortalTools" component={PortalToolsScreen} />
-        <Stack.Screen name="FacultyShowcase" component={FacultyShowcaseScreen} />
-        <Stack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} />
-      </Stack.Navigator>
-    );
-  };
+  const { isAuthenticated } = useAuthStore();
 
   return (
     <NavigationContainer>
@@ -197,7 +198,7 @@ export const AppNavigator: React.FC = () => {
             <Stack.Screen name="OTPVerify" component={OTPVerifyScreen} />
           </>
         ) : (
-          <Stack.Screen name="AppHome" children={renderRoleStack} />
+          <Stack.Screen name="AppHome" component={RoleStackComponent} />
         )}
       </Stack.Navigator>
     </NavigationContainer>
