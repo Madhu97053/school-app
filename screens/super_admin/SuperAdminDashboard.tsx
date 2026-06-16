@@ -1,300 +1,336 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, TextInput, Alert, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, ScrollView, Pressable, StyleSheet, Platform, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { GlassCard } from '../../components/GlassCard';
-import { InteractiveButton } from '../../components/InteractiveButton';
-import { mockKPIs, mockLeaves, LeaveRequest } from '../../services/mockData';
-import { Users, GraduationCap, Percent, DollarSign, BellRing, Briefcase, Calendar, CheckSquare, XSquare } from 'lucide-react-native';
+import { 
+  School, Users, TrendingUp, TrendingDown, LayoutGrid, 
+  UserCheck, Banknote, BarChart, Megaphone, CalendarCheck, 
+  Briefcase, Receipt, ShieldCheck, Settings, AlertTriangle, 
+  ChevronRight 
+} from 'lucide-react-native';
 
 export const SuperAdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'analytics' | 'operations' | 'staff'>('analytics');
-  const [broadcastMessage, setBroadcastMessage] = useState('');
-  const [leaves, setLeaves] = useState<LeaveRequest[]>(mockLeaves);
+  const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
 
-  // Mock Expenses
-  const expensesList = [
-    { id: 'exp_1', title: 'Fiber Internet & Bandwidth', category: 'Utilities', amount: 850, date: 'June 05' },
-    { id: 'exp_2', title: 'Main Campus Electricity Grid', category: 'Utilities', amount: 3200, date: 'June 04' },
-    { id: 'exp_3', title: 'Software ERP Licensing', category: 'Subscr.', amount: 1200, date: 'May 28' },
-    { id: 'exp_4', title: 'HVAC Duct Maintenance', category: 'Repairs', amount: 450, date: 'May 20' },
-  ];
-
-  // Mock Daily Diary logs
-  const dailyDiaryLogs = [
-    { id: 'dl_1', teacher: 'Sarah Jenkins', grade: 'Grade 9-A', subject: 'Math', topic: 'Quadratic equation factoring and graphing', time: '09:00 AM' },
-    { id: 'dl_2', teacher: 'Dr. Alvarez M.', grade: 'Grade 10-B', subject: 'Physics', topic: 'Experimenting with pendulums and kinetic coefficients', time: '11:15 AM' },
-    { id: 'dl_3', teacher: 'Smith K.', grade: 'Grade 9-A', subject: 'English', topic: 'Analysis of Macbeth Soliloquy in Act 3 Scene 2', time: '01:30 PM' },
-  ];
-
-  // Mock Staff data
-  const staffList = [
-    { id: 'st_1', name: 'Marcus Vance', email: 'marcus@aurelia.edu', role: 'Registrar Staff', baseSalary: 3200, category: 'Administrative', paid: true, attendance: '98%' },
-    { id: 'st_2', name: 'Sarah Jenkins', email: 'sarah@aurelia.edu', role: 'Math Lead Teacher', baseSalary: 4200, category: 'Teaching Staff', paid: false, attendance: '96%' },
-    { id: 'st_3', name: 'Dr. Alvarez M.', email: 'alvarez@aurelia.edu', role: 'Science Head', baseSalary: 4800, category: 'Teaching Staff', paid: false, attendance: '97%' },
-    { id: 'st_4', name: 'David Miller', email: 'david@aurelia.edu', role: 'Clerk / Assistant', baseSalary: 2400, category: 'Support Staff', paid: true, attendance: '93%' },
-  ];
-
-  const [staffData, setStaffData] = useState(staffList);
-
-  const handleBroadcast = () => {
-    if (!broadcastMessage.trim()) {
-      Alert.alert("Error", "Broadcast message cannot be empty.");
-      return;
-    }
-    Alert.alert("Broadcast Sent", `System Broadcast dispatched to all portals:\n"${broadcastMessage}"`);
-    setBroadcastMessage('');
+  // Format current date
+  const getFormattedDate = () => {
+    const options: any = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date().toLocaleDateString('en-US', options);
   };
 
-  const handleLeaveAction = (id: string, action: 'approved' | 'rejected') => {
-    setLeaves(prev => prev.map(l => l.id === id ? { ...l, status: action } : l));
-    Alert.alert("Leave Updated", `Leave request has been ${action}.`);
+  const handleEmergencyAlert = () => {
+    Alert.alert(
+      "Emergency Broadcast Triggered",
+      "System emergency notification dispatched to all student, parent, and teacher portals."
+    );
   };
 
-  const handleReleaseSalary = (staffId: string, name: string) => {
-    setStaffData(prev => prev.map(s => s.id === staffId ? { ...s, paid: true } : s));
-    Alert.alert("Salary Disbursed", `Payment process approved and initiated for ${name}.`);
+  // Neomorphic sparkline helper
+  const renderSparkline = (heights: number[], color: string) => {
+    return (
+      <View className="flex-row items-end gap-1 h-10 w-16 opacity-60">
+        {heights.map((h, i) => (
+          <View 
+            key={i} 
+            className="w-1 rounded-full" 
+            style={{ height: `${h}%`, backgroundColor: color }} 
+          />
+        ))}
+      </View>
+    );
   };
+
+  const recentActivities = [
+    { id: '1', title: 'Morning Attendance Complete', subtitle: '98.2% reported by Class Teachers', time: '09:15 AM', status: 'success', glowColor: '#41eec2' },
+    { id: '2', title: 'Pending Fee Installments (32)', subtitle: 'Automated reminders sent to parents', time: '11:30 AM', status: 'warning', glowColor: '#f5c518' },
+    { id: '3', title: 'Critical Low Inventory: Lab Assets', subtitle: 'Beakers and chemicals stock alert', time: '01:00 PM', status: 'danger', glowColor: '#ffb4ab' },
+    { id: '4', title: 'Staff Meeting Minutes Published', subtitle: 'Shared with academic department heads', time: '02:45 PM', status: 'info', glowColor: '#41eec2' },
+  ];
 
   return (
-    <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
-      <View className="mb-6">
-        <Text className="text-white text-3xl font-extrabold">Executive Hub</Text>
-        <Text className="text-white/50 text-sm mt-1">Super Admin Analytics & Control</Text>
-      </View>
+    <View style={styles.container}>
+      {/* Background Gradient */}
+      <LinearGradient
+        colors={['#1d2022', '#101415']}
+        start={{ x: 1, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
 
-      {/* Tabs Selector */}
-      <View className="flex-row bg-white/5 p-1 rounded-xl mb-6">
-        <Pressable
-          onPress={() => setActiveTab('analytics')}
-          className={`flex-1 py-3 rounded-lg items-center ${activeTab === 'analytics' ? 'bg-brand-indigo' : ''}`}
-        >
-          <Text className="text-white text-sm font-semibold">Analytics</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setActiveTab('operations')}
-          className={`flex-1 py-3 rounded-lg items-center ${activeTab === 'operations' ? 'bg-brand-indigo' : ''}`}
-        >
-          <Text className="text-white text-sm font-semibold">Operations</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setActiveTab('staff')}
-          className={`flex-1 py-3 rounded-lg items-center ${activeTab === 'staff' ? 'bg-brand-indigo' : ''}`}
-        >
-          <Text className="text-white text-sm font-semibold">Staff & Payroll</Text>
-        </Pressable>
-      </View>
-
-      {/* TAB 1: ANALYTICS & CONTROL */}
-      {activeTab === 'analytics' && (
-        <View>
-          {/* KPI Section */}
-          <View className="flex-row flex-wrap justify-between mb-4">
-            <GlassCard className="w-[48%] p-4 mb-4" intensity="medium">
-              <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-white/60 text-[10px] font-semibold uppercase">Total Students</Text>
-                <GraduationCap size={18} color="#3B82F6" />
-              </View>
-              <Text className="text-white text-2xl font-extrabold">{mockKPIs.totalStudents}</Text>
-              <Text className="text-emerald-450 text-[10px] mt-1">+4.2% from last term</Text>
-            </GlassCard>
-
-            <GlassCard className="w-[48%] p-4 mb-4" intensity="medium">
-              <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-white/60 text-[10px] font-semibold uppercase">Teachers</Text>
-                <Users size={18} color="#A78BFA" />
-              </View>
-              <Text className="text-white text-2xl font-extrabold">{mockKPIs.totalTeachers}</Text>
-              <Text className="text-white/40 text-[10px] mt-1">Ratio 1:16 ratio</Text>
-            </GlassCard>
-
-            <GlassCard className="w-[48%] p-4 mb-4" intensity="medium">
-              <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-white/60 text-[10px] font-semibold uppercase">Attendance</Text>
-                <Percent size={18} color="#10B981" />
-              </View>
-              <Text className="text-white text-2xl font-extrabold">{mockKPIs.attendanceRate}%</Text>
-              <Text className="text-emerald-450 text-[10px] mt-1">Optimal Range</Text>
-            </GlassCard>
-
-            <GlassCard className="w-[48%] p-4 mb-4" intensity="medium">
-              <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-white/60 text-[10px] font-semibold uppercase">Total Revenue</Text>
-                <DollarSign size={18} color="#F59E0B" />
-              </View>
-              <Text className="text-white text-2xl font-extrabold">${mockKPIs.revenue.toLocaleString()}</Text>
-              <Text className="text-emerald-450 text-[10px] mt-1">98% collected</Text>
-            </GlassCard>
-          </View>
-
-          {/* Expenses Breakdown */}
-          <Text className="text-white/80 text-sm font-semibold mb-3 ml-1">Monthly School Expenses</Text>
-          <GlassCard className="p-4 mb-6" intensity="medium">
-            {expensesList.map((item) => (
-              <View key={item.id} className="flex-row justify-between items-center py-2 border-b border-white/5 last:border-b-0">
-                <View>
-                  <Text className="text-white font-semibold text-sm">{item.title}</Text>
-                  <Text className="text-white/40 text-[10px] uppercase font-semibold mt-0.5">{item.category} • {item.date}</Text>
-                </View>
-                <Text className="text-red-400 font-bold text-sm">${item.amount}</Text>
-              </View>
-            ))}
-          </GlassCard>
-
-          {/* Emergency Broadcasts */}
-          <GlassCard className="p-5 mb-6" intensity="high">
-            <View className="flex-row items-center mb-3">
-              <BellRing size={20} color="#EF4444" />
-              <Text className="text-white text-base font-bold ml-2">Emergency Broadcast System</Text>
+      {/* Header with Custom Glow Shadow */}
+      <View style={{ zIndex: 50 }}>
+        {/* Top App Bar */}
+        <BlurView intensity={30} tint="dark" style={[styles.header, { paddingTop: insets.top + (Platform.OS === 'android' ? 28 : 20) }]}>
+          <View className="flex-row items-center gap-3">
+            <View className="w-10 h-10 rounded-xl bg-[#f5c518] items-center justify-center">
+              <School size={22} color="#241a00" />
             </View>
-            <TextInput
-              placeholder="Type emergency alert for students, parents, and teachers..."
-              placeholderTextColor="rgba(255, 255, 255, 0.4)"
-              value={broadcastMessage}
-              onChangeText={setBroadcastMessage}
-              multiline
-              numberOfLines={3}
-              className="bg-white/5 border border-white/10 rounded-xl p-3 text-white text-sm mb-4"
-            />
-            <InteractiveButton
-              onPress={handleBroadcast}
-              title="Dispatch System Broadcast"
-              variant="primary"
-              style={{ backgroundColor: '#EF4444' }}
-            />
-          </GlassCard>
-        </View>
-      )}
-
-      {/* TAB 2: OPERATIONS & LEAVES */}
-      {activeTab === 'operations' && (
-        <View>
-          {/* Leave Approvals */}
-          <Text className="text-white/80 text-sm font-semibold mb-3 ml-1">Pending Leave Approvals</Text>
-          {leaves.filter(l => l.status === 'pending').length === 0 ? (
-            <GlassCard className="p-4 mb-6 items-center" intensity="medium">
-              <Text className="text-white/40 text-sm">No pending leave requests found.</Text>
-            </GlassCard>
-          ) : (
-            leaves.filter(l => l.status === 'pending').map((leave) => (
-              <GlassCard key={leave.id} className="p-4 mb-4" intensity="medium">
-                <View className="flex-row justify-between items-start mb-2">
-                  <View>
-                    <Text className="text-white font-bold text-base">{leave.name}</Text>
-                    <Text className="text-white/50 text-xs font-semibold uppercase">{leave.role} • {leave.leaveType}</Text>
-                  </View>
-                  <Text className="text-brand-indigo text-xs font-semibold">{leave.startDate} to {leave.endDate}</Text>
-                </View>
-                <Text className="text-white/70 text-sm mb-4">{leave.reason}</Text>
-                <View className="flex-row space-x-3">
-                  <Pressable
-                    onPress={() => handleLeaveAction(leave.id, 'approved')}
-                    className="bg-emerald-600 px-4 py-2.5 rounded-xl flex-1 items-center"
-                  >
-                    <Text className="text-white font-bold text-xs">Approve</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => handleLeaveAction(leave.id, 'rejected')}
-                    className="bg-red-950/60 border border-red-500/30 px-4 py-2.5 rounded-xl flex-1 items-center"
-                  >
-                    <Text className="text-red-400 font-bold text-xs">Reject</Text>
-                  </Pressable>
-                </View>
-              </GlassCard>
-            ))
-          )}
-
-          {/* Daily Diary View */}
-          <Text className="text-white/80 text-sm font-semibold mb-3 ml-1">Daily Diary Logs (Audits)</Text>
-          <View className="space-y-4">
-            {dailyDiaryLogs.map((log) => (
-              <GlassCard key={log.id} className="p-4 mb-4" intensity="medium">
-                <View className="flex-row justify-between items-center mb-2">
-                  <View>
-                    <Text className="text-white font-bold text-sm">{log.grade} • {log.subject}</Text>
-                    <Text className="text-white/40 text-[10px] font-semibold mt-0.5">Teacher: {log.teacher}</Text>
-                  </View>
-                  <View className="bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
-                    <Text className="text-white/60 text-[9px] font-bold">{log.time}</Text>
-                  </View>
-                </View>
-                <Text className="text-white/70 text-xs leading-5">Topics: {log.topic}</Text>
-              </GlassCard>
-            ))}
+            <View>
+              <Text className="text-xl font-bold text-white font-display-lg">EduVision</Text>
+              <Text className="text-[9px] uppercase tracking-widest text-[#d1c5ac]">Super Admin Terminal</Text>
+            </View>
           </View>
-        </View>
-      )}
 
-      {/* TAB 3: STAFF & PAYROLL */}
-      {activeTab === 'staff' && (
-        <View>
-          {/* Salary Categories */}
-          <Text className="text-white/80 text-sm font-semibold mb-3 ml-1">Salary Categories Config</Text>
-          <GlassCard className="p-4 mb-6" intensity="medium">
-            <View className="space-y-3">
-              <View className="flex-row justify-between items-center py-1">
-                <Text className="text-white text-sm font-semibold">Administrative Staff</Text>
-                <Text className="text-brand-indigo text-xs font-bold">$2,000 - $4,000 / mo</Text>
+          <Pressable 
+            onPress={handleEmergencyAlert} 
+            className="w-10 h-10 rounded-full bg-red-600 items-center justify-center active:scale-95 shadow-[0_0_15px_rgba(220,38,38,0.6)]"
+          >
+            <AlertTriangle size={18} color="#FFF" />
+          </Pressable>
+        </BlurView>
+        
+        {/* The glowing shadow below the line */}
+        <LinearGradient 
+          colors={['rgba(245, 197, 24, 0.15)', 'transparent']} 
+          style={{ position: 'absolute', bottom: -15, left: 0, right: 0, height: 15 }}
+          pointerEvents="none"
+        />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Welcome greeting */}
+        <View className="px-5 mb-6">
+          <Text className="text-white text-2xl font-bold font-display-lg leading-tight">
+            Welcome back, <Text className="text-[#ffe5a0]">Principal Sharma</Text>
+          </Text>
+          <Text className="text-[#d1c5ac] text-xs font-body-sm mt-1">{getFormattedDate()}</Text>
+        </View>
+
+        {/* Bento Stats Grid */}
+        <View className="px-5 flex-row flex-wrap justify-between mb-8">
+          {/* Stat 1: Total Students */}
+          <GlassCard 
+            className="w-[48%] p-4 mb-4 border border-white/10" 
+            style={{ backgroundColor: '#1d2122', shadowColor: '#f5c518', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 8 }}
+          >
+            <View className="flex-row justify-between items-start mb-3">
+              <Text className="text-[#d1c5ac] text-[10px] font-bold uppercase tracking-wider">Total Students</Text>
+              <View className="flex-row items-center gap-0.5">
+                <TrendingUp size={10} color="#41eec2" />
+                <Text className="text-[#41eec2] text-[10px] font-bold">2%</Text>
               </View>
-              <View className="flex-row justify-between items-center py-1 border-t border-white/5 mt-2 pt-2">
-                <Text className="text-white text-sm font-semibold">Teaching Staff</Text>
-                <Text className="text-brand-indigo text-xs font-bold">$3,500 - $6,000 / mo</Text>
-              </View>
-              <View className="flex-row justify-between items-center py-1 border-t border-white/5 mt-2 pt-2">
-                <Text className="text-white text-sm font-semibold">Support & Logistics</Text>
-                <Text className="text-brand-indigo text-xs font-bold">$1,500 - $2,800 / mo</Text>
-              </View>
+            </View>
+            <View className="flex-row items-end justify-between">
+              <Text className="text-white text-2xl font-bold">1,248</Text>
+              {renderSparkline([30, 45, 35, 50, 40, 60, 55, 70], '#ffe5a0')}
             </View>
           </GlassCard>
 
-          {/* Staff List, Attendance, and Salary Release */}
-          <Text className="text-white/80 text-sm font-semibold mb-3 ml-1">Staff Management & Payroll</Text>
-          {staffData.map((staff) => (
-            <GlassCard key={staff.id} className="p-5 mb-4" intensity="medium">
-              <View className="flex-row justify-between items-start mb-3">
-                <View>
-                  <Text className="text-white font-bold text-base">{staff.name}</Text>
-                  <Text className="text-white/40 text-xs mt-0.5">{staff.role} • {staff.email}</Text>
-                </View>
-                <View className="bg-brand-indigo/20 border border-brand-indigo/35 px-2.5 py-0.5 rounded-full">
-                  <Text className="text-brand-indigo text-[10px] font-bold">{staff.attendance} Att.</Text>
-                </View>
+          {/* Stat 2: Staff Present */}
+          <GlassCard 
+            className="w-[48%] p-4 mb-4 border border-white/10" 
+            style={{ backgroundColor: '#1d2122', shadowColor: '#f5c518', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 8 }}
+          >
+            <View className="flex-row justify-between items-start mb-3">
+              <Text className="text-[#d1c5ac] text-[10px] font-bold uppercase tracking-wider">Staff Present</Text>
+              <View className="flex-row items-center gap-0.5">
+                <TrendingDown size={10} color="#ffb4ab" />
+                <Text className="text-[#ffb4ab] text-[10px] font-bold">1%</Text>
               </View>
+            </View>
+            <View className="flex-row items-end justify-between">
+              <Text className="text-white text-2xl font-bold">68/72</Text>
+              {renderSparkline([80, 75, 78, 70, 72, 68, 70, 68], '#ffb4ab')}
+            </View>
+          </GlassCard>
 
-              <View className="flex-row justify-between items-center border-t border-white/5 pt-3.5 mt-2">
-                <View>
-                  <Text className="text-white/40 text-[9px] uppercase font-bold">Base Salary</Text>
-                  <Text className="text-white font-extrabold text-base">${staff.baseSalary}</Text>
-                </View>
-
-                {staff.paid ? (
-                  <View className="bg-emerald-950/45 border border-emerald-500/25 px-4 py-2 rounded-xl">
-                    <Text className="text-emerald-450 font-bold text-xs">Released ✓</Text>
-                  </View>
-                ) : (
-                  <Pressable
-                    onPress={() => handleReleaseSalary(staff.id, staff.name)}
-                    className="bg-brand-indigo px-4 py-2 rounded-xl"
-                  >
-                    <Text className="text-white font-bold text-xs">Release Salary</Text>
-                  </Pressable>
-                )}
+          {/* Stat 3: Fee Collected */}
+          <GlassCard 
+            className="w-[48%] p-4 mb-4 border border-white/10" 
+            style={{ backgroundColor: '#1d2122', shadowColor: '#f5c518', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 8 }}
+          >
+            <View className="flex-row justify-between items-start mb-3">
+              <Text className="text-[#d1c5ac] text-[10px] font-bold uppercase tracking-wider">Fee Collected</Text>
+              <View className="flex-row items-center gap-0.5">
+                <TrendingUp size={10} color="#41eec2" />
+                <Text className="text-[#41eec2] text-[10px] font-bold">5%</Text>
               </View>
-            </GlassCard>
-          ))}
+            </View>
+            <View className="flex-row items-end justify-between">
+              <Text className="text-white text-2xl font-bold">₹14.2L</Text>
+              {renderSparkline([40, 50, 45, 60, 55, 75, 70, 85], '#41eec2')}
+            </View>
+          </GlassCard>
+
+          {/* Stat 4: Avg Attendance */}
+          <GlassCard 
+            className="w-[48%] p-4 mb-4 border border-white/10" 
+            style={{ backgroundColor: '#1d2122', shadowColor: '#f5c518', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 8 }}
+          >
+            <View className="flex-row justify-between items-start mb-3">
+              <Text className="text-[#d1c5ac] text-[10px] font-bold uppercase tracking-wider">Avg Attendance</Text>
+              <View className="flex-row items-center gap-0.5">
+                <TrendingUp size={10} color="#41eec2" />
+                <Text className="text-[#41eec2] text-[10px] font-bold">0.5%</Text>
+              </View>
+            </View>
+            <View className="flex-row items-end justify-between">
+              <Text className="text-white text-2xl font-bold">87.4%</Text>
+              {renderSparkline([60, 65, 70, 68, 75, 80, 82, 87], '#41eec2')}
+            </View>
+          </GlassCard>
         </View>
-      )}
-    </ScrollView>
+
+        {/* Command Center Quick Actions Console */}
+        <View className="px-5 mb-8">
+          <View className="flex-row items-center gap-2 mb-4">
+            <LayoutGrid size={20} color="#ffe5a0" />
+            <Text className="text-white text-lg font-bold">Command Center</Text>
+          </View>
+
+          <View className="flex-row flex-wrap justify-between">
+            {/* Action 1: Manage Users */}
+            <Pressable 
+              onPress={() => navigation.navigate('Users')}
+              className="w-[31%] bg-white/5 border border-white/10 rounded-2xl p-4 items-center justify-center mb-3 active:scale-95"
+            >
+              <Users size={24} color="#ffe5a0" />
+              <Text className="text-white text-[10px] font-bold text-center mt-2">Manage Users</Text>
+            </Pressable>
+
+            {/* Action 2: Fee Structure */}
+            <Pressable 
+              onPress={() => navigation.navigate('FeeStructure')}
+              className="w-[31%] bg-white/5 border border-white/10 rounded-2xl p-4 items-center justify-center mb-3 active:scale-95"
+            >
+              <Banknote size={24} color="#ffe5a0" />
+              <Text className="text-white text-[10px] font-bold text-center mt-2">Fee Structure</Text>
+            </Pressable>
+
+            {/* Action 3: Analytics */}
+            <Pressable 
+              onPress={() => navigation.navigate('Analytics')}
+              className="w-[31%] bg-white/5 border border-white/10 rounded-2xl p-4 items-center justify-center mb-3 active:scale-95"
+            >
+              <BarChart size={24} color="#ffe5a0" />
+              <Text className="text-white text-[10px] font-bold text-center mt-2">Analytics</Text>
+            </Pressable>
+
+            {/* Action 4: Announcements */}
+            <Pressable 
+              onPress={() => navigation.navigate('Broadcast')}
+              className="w-[31%] bg-white/5 border border-white/10 rounded-2xl p-4 items-center justify-center mb-3 active:scale-95"
+            >
+              <Megaphone size={24} color="#ffe5a0" />
+              <Text className="text-white text-[10px] font-bold text-center mt-2">Announcements</Text>
+            </Pressable>
+
+            {/* Action 5: Leave Approvals */}
+            <Pressable 
+              onPress={() => navigation.navigate('LeaveApprovals')}
+              className="w-[31%] bg-white/5 border border-white/10 rounded-2xl p-4 items-center justify-center mb-3 active:scale-95"
+            >
+              <CalendarCheck size={24} color="#ffe5a0" />
+              <Text className="text-white text-[10px] font-bold text-center mt-2">Leave Approvals</Text>
+            </Pressable>
+
+            {/* Action 6: Salary & Payroll */}
+            <Pressable 
+              onPress={() => navigation.navigate('SalaryExpenses')}
+              className="w-[31%] bg-white/5 border border-white/10 rounded-2xl p-4 items-center justify-center mb-3 active:scale-95"
+            >
+              <Briefcase size={24} color="#ffe5a0" />
+              <Text className="text-white text-[10px] font-bold text-center mt-2">Salary & Payroll</Text>
+            </Pressable>
+
+            {/* Action 7: Expenses */}
+            <Pressable 
+              onPress={() => navigation.navigate('SalaryExpenses')}
+              className="w-[31%] bg-white/5 border border-white/10 rounded-2xl p-4 items-center justify-center mb-3 active:scale-95"
+            >
+              <Receipt size={24} color="#ffe5a0" />
+              <Text className="text-white text-[10px] font-bold text-center mt-2">Expenses</Text>
+            </Pressable>
+
+            {/* Action 8: Staff Access */}
+            <Pressable 
+              onPress={() => navigation.navigate('Users')}
+              className="w-[31%] bg-white/5 border border-white/10 rounded-2xl p-4 items-center justify-center mb-3 active:scale-95"
+            >
+              <UserCheck size={24} color="#ffe5a0" />
+              <Text className="text-white text-[10px] font-bold text-center mt-2">Staff Access</Text>
+            </Pressable>
+
+            {/* Action 9: App Settings */}
+            <Pressable 
+              onPress={() => navigation.navigate('Settings')}
+              className="w-[31%] bg-white/5 border border-white/10 rounded-2xl p-4 items-center justify-center mb-3 active:scale-95"
+            >
+              <Settings size={24} color="#ffe5a0" />
+              <Text className="text-white text-[10px] font-bold text-center mt-2">App Settings</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Recent Activity Feed */}
+        <View className="px-5 mb-8">
+          <View className="flex-row items-center gap-2 mb-4">
+            <ShieldCheck size={20} color="#ffe5a0" />
+            <Text className="text-white text-lg font-bold">Terminal Feed</Text>
+          </View>
+
+          <View className="gap-3">
+            {recentActivities.map((act) => (
+              <GlassCard 
+                key={act.id} 
+                className="px-4 py-5 flex-row items-center justify-between" 
+                intensity="low"
+                glowColor={act.glowColor}
+                style={{ 
+                  borderWidth: 1, 
+                  borderColor: 'rgba(255,255,255,0.1)',
+                  borderLeftWidth: act.status === 'warning' ? 3 : 1, 
+                  borderLeftColor: act.status === 'warning' ? act.glowColor : 'rgba(255,255,255,0.1)' 
+                }}
+              >
+                <View className="flex-row items-center gap-4 flex-1">
+                  <View 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ 
+                      backgroundColor: act.glowColor, 
+                      shadowColor: act.glowColor, 
+                      shadowOffset: { width: 0, height: 0 }, 
+                      shadowOpacity: 1, 
+                      shadowRadius: 18, 
+                      elevation: 16 
+                    }} 
+                  />
+                  <View className="flex-1 pr-2">
+                    <Text className="text-white font-bold text-sm">{act.title}</Text>
+                    <Text className="text-[#d1c5ac] text-[11px] mt-0.5">{act.subtitle}</Text>
+                  </View>
+                </View>
+                <Text className="text-[#d1c5ac] text-[10px] font-semibold">{act.time}</Text>
+              </GlassCard>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
+  container: {
     flex: 1,
-    backgroundColor: '#0B0F19',
+    backgroundColor: '#101415',
   },
-  contentContainer: {
+  header: {
+    paddingBottom: 16,
     paddingHorizontal: 20,
-    paddingVertical: 24,
-    paddingBottom: 40,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  scrollContent: {
+    paddingTop: 16,
+    paddingBottom: 100, // accommodate bottom tab navigator height
   },
 });
 

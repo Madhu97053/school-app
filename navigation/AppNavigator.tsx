@@ -67,14 +67,12 @@ import FeeStructureScreen from '../screens/guest/FeeStructureScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Common Tab Navigator Options
 const getTabOptions = (icon: any, activeColor: string) => ({
   tabBarIcon: ({ color, size }: { color: string; size: number }) => {
     const IconComponent = icon;
     return <IconComponent size={size} color={color} />;
   },
   tabBarActiveTintColor: activeColor,
-  tabBarInactiveTintColor: 'rgba(255,255,255,0.4)',
   headerShown: false, // We'll build custom headers in the screens
 });
 

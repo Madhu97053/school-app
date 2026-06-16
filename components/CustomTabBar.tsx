@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, Dimensions, Platform } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../store/useAuthStore';
 
 const { width } = Dimensions.get('window');
@@ -13,15 +13,20 @@ export const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarPro
 
   return (
     <View style={isFloating ? styles.floatingContainer : styles.fullWidthContainer}>
-      <BlurView intensity={20} tint="dark" style={styles.blurContainer}>
+      <LinearGradient
+        colors={['#383f47', '#1f2429', '#101415']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.blurContainer}
+      >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const label =
             options.tabBarLabel !== undefined
               ? options.tabBarLabel
               : options.title !== undefined
-              ? options.title
-              : route.name;
+                ? options.title
+                : route.name;
 
           const isFocused = state.index === index;
 
@@ -37,16 +42,15 @@ export const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarPro
             }
           };
 
-          const activeTintColor = options.tabBarActiveTintColor || '#fff';
-          const inactiveTintColor = options.tabBarInactiveTintColor || 'rgba(255,255,255,0.7)';
+          const activeTintColor = options.tabBarActiveTintColor || '#f5c518';
+          const inactiveTintColor = options.tabBarInactiveTintColor || '#a9e3ffff';
 
           return (
             <Pressable
               key={index}
               onPress={onPress}
-              className={`flex-1 items-center justify-center py-2 ${
-                isFocused ? 'scale-105' : 'scale-100'
-              }`}
+              className={`flex-1 items-center justify-center py-2 ${isFocused ? 'scale-105' : 'scale-100'
+                }`}
               style={{
                 opacity: isFocused ? 1 : 0.7,
               }}
@@ -70,7 +74,7 @@ export const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarPro
             </Pressable>
           );
         })}
-      </BlurView>
+      </LinearGradient>
     </View>
   );
 };
@@ -85,13 +89,13 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-    elevation: 10,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.2)', // Glossy edge highlight
+    elevation: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
   },
   fullWidthContainer: {
     position: 'absolute',
@@ -100,22 +104,22 @@ const styles = StyleSheet.create({
     right: 0,
     width: '100%',
     height: 64,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     overflow: 'hidden',
-    borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-    elevation: 10,
+    borderTopWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.2)', // Glossy edge highlight
+    elevation: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
   },
   blurContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    backgroundColor: 'rgba(33, 12, 24, 0.4)', // Slightly transparent background for the glass effect
+    backgroundColor: 'transparent',
   },
 });

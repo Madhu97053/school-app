@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, Platform } from 'react-native';
 
 interface GlassCardProps {
   children: React.ReactNode;
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.15,
     shadowRadius: 18,
-    elevation: 8,
+    elevation: Platform.OS === 'android' ? 0 : 8,
     overflow: 'hidden',
   },
 });
