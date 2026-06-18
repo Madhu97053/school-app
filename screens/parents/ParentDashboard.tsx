@@ -1,345 +1,400 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Image, Alert, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, Image, StyleSheet, Dimensions, Platform } from 'react-native';
 import { useAuthStore } from '../../store/useAuthStore';
-import { mockFees, mockHomework, mockExams, mockTimetable } from '../../services/mockData';
-import { GlassCard } from '../../components/GlassCard';
-import { CustomInput } from '../../components/CustomInput';
-import { InteractiveButton } from '../../components/InteractiveButton';
-import { CreditCard, Compass, MessageCircle, AlertCircle, Award, Calendar, Clock, BookOpen, PenTool } from 'lucide-react-native';
+import { mockFees, mockHomework, mockExams } from '../../services/mockData';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import {
+  Bell,
+  ChevronDown,
+  CheckCircle,
+  Calendar,
+  FileText,
+  Award,
+  CreditCard,
+  Bus,
+  Clock,
+  MessageSquare,
+  AlertTriangle,
+  ChevronRight,
+  ShieldCheck,
+  FlaskConical,
+  MessageCircle
+} from 'lucide-react-native';
+
+const { width } = Dimensions.get('window');
 
 export const ParentDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { user, activeChildId, switchChild } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'home' | 'academics' | 'fees' | 'leaves'>('home');
-
-  // Leave Form States
-  const [leaveStartDate, setLeaveStartDate] = useState('2026-06-18');
-  const [leaveEndDate, setLeaveEndDate] = useState('2026-06-19');
-  const [leaveReason, setLeaveReason] = useState('');
-  const [studentLeaves, setStudentLeaves] = useState([
-    { id: 'sl_1', startDate: '2026-05-10', endDate: '2026-05-11', reason: 'Fever checkup doctor note', status: 'Approved' }
-  ]);
+  const [showChildPicker, setShowChildPicker] = useState(false);
 
   if (!user || !user.children) return null;
 
   const currentChild = user.children.find(c => c.id === activeChildId) || user.children[0];
-  
-  // Calculate stats for current active child
+  const inactiveChild = user.children.find(c => c.id !== activeChildId) || user.children[1];
+
+  // Calculate dynamic stats for current active child
   const fees = mockFees[currentChild.id] || [];
   const homework = mockHomework[currentChild.id] || [];
   const exams = mockExams[currentChild.id] || [];
-  const timetable = mockTimetable[currentChild.id] || [];
 
   const pendingFeesCount = fees.filter(f => f.status !== 'paid').length;
   const pendingHwCount = homework.filter(h => h.status === 'pending').length;
-  const nextExam = exams[0];
 
-  // Daily Diary for this child
-  const childDiaryLogs = [
-    { id: 'cd_1', subject: 'Math', topic: 'Completing Matrix Operations sheet', time: '09:00 AM' },
-    { id: 'cd_2', subject: 'English', topic: 'Act 3 character profiles and theme essay draft', time: '01:30 PM' },
-  ];
-
-  const handleApplyStudentLeave = () => {
-    if (!leaveReason.trim()) {
-      Alert.alert("Error", "Please enter a reason for the leave.");
-      return;
-    }
-    const newLeave = {
-      id: `l_${Math.random()}`,
-      startDate: leaveStartDate,
-      endDate: leaveEndDate,
-      reason: leaveReason,
-      status: 'Pending'
-    };
-    setStudentLeaves(prev => [newLeave, ...prev]);
-    Alert.alert("Leave Applied", `Student leave application filed for ${currentChild.name} successfully.`);
-    setLeaveReason('');
+  const handleSwitchChild = (childId: string) => {
+    switchChild(childId);
+    setShowChildPicker(false);
   };
 
   return (
-    <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
-      <View className="mb-6 flex-row justify-between items-center">
-        <View>
-          <Text className="text-white text-3xl font-extrabold">Parent Portal</Text>
-          <Text className="text-white/50 text-sm mt-1">Hello, {user.name}</Text>
+    <View style={styles.container}>
+      {/* Background Gradient */}
+      <LinearGradient
+        colors={['#0E0F26', '#121330']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+
+      {/* Top App Bar */}
+      <View style={styles.header}>
+        <View className="flex-row items-center gap-3">
+          <Pressable 
+            onPress={() => navigation.navigate('StudentProfileDetails')}
+            className="w-10 h-10 rounded-full overflow-hidden border border-white/20"
+          >
+            <Image
+              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCMrIIqhz709VeW2BpRqLVg1j7U7Pl9daXfwRKA-2HDDgcA9W7mXSd5OKr4pnpdIm8PH7zmg2kpcIfjndCo00bTp-Axh-ozzk6NmCmBUgatneU-MIJXsqAP3jNupEJEVMnZddUdmfbtXx9Pf104uwZfzaiIwRgyJZ8fQhJHzGToBXPUzvkGYakj-ALyh-X-w-OuUIWQTLleEFRHfU4lEubjrHCKU1coc5G8ockGv2_JF5fyZw89gZymwweZDxq0LKQFld8hZ2gu1G6t' }}
+              className="w-full h-full object-cover"
+            />
+          </Pressable>
+          <View>
+            <Text className="text-white/70 text-xs font-semibold">Good Morning,</Text>
+            <Text className="text-white text-lg font-bold font-headline-md">{user.name} 👋</Text>
+          </View>
         </View>
-        
-        {/* Child Avatar Switcher */}
-        <View className="flex-row space-x-2">
-          {user.children.map((child) => (
-            <Pressable
-              key={child.id}
-              onPress={() => switchChild(child.id)}
-              className={`p-1 rounded-full border-2 ${
-                activeChildId === child.id ? 'border-brand-indigo' : 'border-transparent'
-              }`}
-            >
-              <Image
-                source={{ uri: child.avatar }}
-                className="w-10 h-10 rounded-full"
-              />
-            </Pressable>
-          ))}
-        </View>
+        <Pressable className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 active:scale-95">
+          <Bell size={20} color="#5E5CE6" />
+        </Pressable>
       </View>
 
-      {/* Child Status Summary Card */}
-      <GlassCard className="p-5 mb-6 bg-brand-indigo/10" intensity="high">
-        <View className="flex-row items-center mb-4">
-          <Image
-            source={{ uri: currentChild.avatar }}
-            className="w-14 h-14 rounded-full border-2 border-white/20"
-          />
-          <View className="ml-4">
-            <Text className="text-white text-lg font-bold">{currentChild.name}</Text>
-            <Text className="text-white/60 text-xs font-semibold uppercase">{currentChild.class}</Text>
-          </View>
-        </View>
-
-        <View className="flex-row justify-between pt-2 border-t border-white/10">
-          <View className="items-center flex-1">
-            <Text className="text-white/40 text-[10px] font-bold uppercase mb-1">Attendance</Text>
-            <Text className="text-white text-lg font-extrabold">96.8%</Text>
-          </View>
-          <View className="items-center flex-1 border-x border-white/10">
-            <Text className="text-white/40 text-[10px] font-bold uppercase mb-1">Pending HW</Text>
-            <Text className="text-amber-400 text-lg font-extrabold">{pendingHwCount}</Text>
-          </View>
-          <View className="items-center flex-1">
-            <Text className="text-white/40 text-[10px] font-bold uppercase mb-1">Fee Alerts</Text>
-            <Text className={`text-lg font-extrabold ${pendingFeesCount > 0 ? 'text-red-400' : 'text-white'}`}>
-              {pendingFeesCount}
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Child Switcher */}
+        <View className="items-center mb-6">
+          <Pressable 
+            onPress={() => setShowChildPicker(!showChildPicker)}
+            className="bg-white/10 border border-white/15 px-4 py-2 rounded-full flex-row items-center gap-2 active:scale-95"
+            style={styles.glassCard}
+          >
+            <Text className="text-[#818CF8] font-bold text-xs font-label-md">
+              {currentChild.name} ({currentChild.class.replace('Grade ', '')})
             </Text>
-          </View>
-        </View>
-      </GlassCard>
-
-      {/* Tabs Selector */}
-      <View className="flex-row bg-white/5 p-1 rounded-xl mb-6">
-        <Pressable
-          onPress={() => setActiveTab('home')}
-          className={`flex-1 py-3 rounded-lg items-center ${activeTab === 'home' ? 'bg-brand-indigo' : ''}`}
-        >
-          <Text className="text-white text-[11px] font-semibold">Home</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setActiveTab('academics')}
-          className={`flex-1 py-3 rounded-lg items-center ${activeTab === 'academics' ? 'bg-brand-indigo' : ''}`}
-        >
-          <Text className="text-white text-[11px] font-semibold">Academics</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setActiveTab('fees')}
-          className={`flex-1 py-3 rounded-lg items-center ${activeTab === 'fees' ? 'bg-brand-indigo' : ''}`}
-        >
-          <Text className="text-white text-[11px] font-semibold">Fees</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setActiveTab('leaves')}
-          className={`flex-1 py-3 rounded-lg items-center ${activeTab === 'leaves' ? 'bg-brand-indigo' : ''}`}
-        >
-          <Text className="text-white text-[11px] font-semibold">Leaves</Text>
-        </Pressable>
-      </View>
-
-      {/* TAB 1: HOME HUB */}
-      {activeTab === 'home' && (
-        <View>
-          {/* Quick Actions */}
-          <Text className="text-white/80 text-sm font-semibold mb-3 ml-1">Quick Actions</Text>
-          <View className="flex-row flex-wrap justify-between mb-4">
-            <Pressable
-              onPress={() => navigation.navigate('BusTracking')}
-              className="bg-white/5 border border-white/10 p-4 rounded-2xl mb-4 w-[48%] flex-row items-center"
+            <ChevronDown size={14} color="#818CF8" />
+          </Pressable>
+ 
+          {showChildPicker && inactiveChild && (
+            <Pressable 
+              onPress={() => handleSwitchChild(inactiveChild.id)}
+              className="absolute top-10 bg-[#16162D] border border-white/10 px-4 py-2 rounded-full z-50 active:scale-95 shadow-lg"
             >
-              <Compass size={18} color="#10B981" />
-              <Text className="text-white font-bold text-xs ml-3">Track Bus</Text>
+              <Text className="text-white/70 text-xs font-label-md">
+                Switch to {inactiveChild.name} ({inactiveChild.class.replace('Grade ', '')})
+              </Text>
             </Pressable>
-
-            <Pressable
-              onPress={() => navigation.navigate('Messaging', { chatKey: 'teacher_parent' })}
-              className="bg-white/5 border border-white/10 p-4 rounded-2xl mb-4 w-[48%] flex-row items-center"
-            >
-              <MessageCircle size={18} color="#A78BFA" />
-              <Text className="text-white font-bold text-xs ml-3">Message Desk</Text>
-            </Pressable>
-          </View>
-
-          {/* Upcoming Exams */}
-          <Text className="text-white/80 text-sm font-semibold mb-3 ml-1">Upcoming Exam Schedule</Text>
-          {nextExam ? (
-            <GlassCard className="p-4 flex-row justify-between items-center mb-6" intensity="medium">
-              <View>
-                <Text className="text-white font-bold text-base">{nextExam.subject}</Text>
-                <Text className="text-white/50 text-xs font-semibold uppercase">{nextExam.examName}</Text>
-              </View>
-              <View className="items-end">
-                <Text className="text-brand-indigo font-bold text-sm">{nextExam.date}</Text>
-                <Text className="text-white/40 text-[10px] mt-1">Class Avg: {nextExam.classAverage}%</Text>
-              </View>
-            </GlassCard>
-          ) : null}
-
-          {/* Important notifications */}
-          {pendingFeesCount > 0 && (
-            <GlassCard className="p-4 border-l-4 border-l-red-500 flex-row items-start mb-6" intensity="low">
-              <AlertCircle size={20} color="#EF4444" style={{ marginTop: 2 }} />
-              <View className="ml-3 flex-1">
-                <Text className="text-white font-bold text-sm">Action Required: Outstanding Dues</Text>
-                <Text className="text-white/60 text-xs mt-1">
-                  You have tuition or transport invoices pending payment for {currentChild.name}. Please pay online to avoid interruption.
-                </Text>
-              </View>
-            </GlassCard>
           )}
         </View>
-      )}
 
-      {/* TAB 2: ACADEMICS & TIMETABLE */}
-      {activeTab === 'academics' && (
-        <View>
-          {/* Daily Homework */}
-          <Text className="text-white/80 text-sm font-semibold mb-3 ml-1">Homework Assignments</Text>
-          {homework.map((hw) => (
-            <GlassCard key={hw.id} className="p-4 mb-4 flex-row justify-between items-center" intensity="medium">
-              <View className="flex-1 mr-3">
-                <Text className="text-white font-bold text-sm">{hw.title}</Text>
-                <Text className="text-white/50 text-[10px] font-semibold mt-0.5">{hw.subject} • Assigned by {hw.teacherName}</Text>
-              </View>
-              <View className="bg-brand-indigo/25 px-2.5 py-1 rounded-xl">
-                <Text className="text-white text-[10px] font-bold">Due {hw.dueDate.split('-')[2]}</Text>
-              </View>
-            </GlassCard>
-          ))}
-
-          {/* Daily Timetable */}
-          <Text className="text-white/80 text-sm font-semibold mb-3 mt-4 ml-1">Class Timetable Slots</Text>
-          {timetable.map((slot) => (
-            <GlassCard key={slot.id} className="p-4 mb-3 flex-row justify-between items-center" intensity="medium">
-              <View>
-                <Text className="text-white font-bold text-sm">{slot.subject}</Text>
-                <Text className="text-white/50 text-[10px] mt-0.5">{slot.teacher} • {slot.room}</Text>
-              </View>
-              <View className="flex-row items-center bg-white/5 px-3 py-1 rounded-full border border-white/5">
-                <Clock size={10} color="#818CF8" />
-                <Text className="text-white/60 text-[10px] ml-1.5">{slot.time.split(' ')[0]}</Text>
-              </View>
-            </GlassCard>
-          ))}
-
-          {/* Daily Diary View */}
-          <Text className="text-white/80 text-sm font-semibold mb-3 mt-4 ml-1">Daily Diary Logs (What was studied today)</Text>
-          {childDiaryLogs.map((log) => (
-            <GlassCard key={log.id} className="p-4 mb-3" intensity="medium">
-              <View className="flex-row justify-between items-center mb-1.5">
-                <Text className="text-white font-bold text-sm">{log.subject} Lesson Coverage</Text>
-                <Text className="text-white/40 text-[9px]">{log.time}</Text>
-              </View>
-              <Text className="text-white/70 text-xs leading-5">Topics: {log.topic}</Text>
-            </GlassCard>
-          ))}
+        {/* Attendance Status Row */}
+        <View className="px-5 mb-5">
+          <View 
+            style={[styles.glassCard, styles.attendanceCard]}
+            className="p-4 flex-row items-center gap-4 border-l-4 border-l-green-500"
+          >
+            <View className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+              <CheckCircle size={20} color="#22c55e" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-white font-medium text-sm leading-tight">
+                {currentChild.name} entered school at {currentChild.id === 'stud_001' ? '8:42 AM' : '8:45 AM'} today
+              </Text>
+              <Text className="text-white/50 text-[10px] mt-0.5 uppercase tracking-wider font-semibold">
+                {currentChild.id === 'stud_001' ? 'Gate 2 • Main Building' : 'Gate 1 • Junior Building'}
+              </Text>
+            </View>
+          </View>
         </View>
-      )}
 
-      {/* TAB 3: FEES & PAYMENTS */}
-      {activeTab === 'fees' && (
-        <View>
-          <Text className="text-white/80 text-sm font-semibold mb-3 ml-1">Fee Invoices & Arrears</Text>
-          {fees.map((fee) => (
-            <GlassCard key={fee.id} className="p-4 mb-4 flex-row justify-between items-center" intensity="high">
-              <View>
-                <Text className="text-white font-bold text-sm">{fee.title}</Text>
-                <Text className="text-white/50 text-[10px] uppercase mt-0.5">Due {fee.dueDate} • {fee.category}</Text>
+        {/* Feature Chips Row */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          className="mb-6 pl-5"
+          contentContainerStyle={{ paddingRight: 30 }}
+        >
+          <Pressable 
+            onPress={() => navigation.navigate('Attendance')}
+            className="flex-row items-center gap-1.5 px-5 py-2.5 rounded-full mr-2 bg-[#5E5CE6] shadow-[0_0_15px_rgba(94,92,230,0.4)]"
+          >
+            <Calendar size={15} color="#FFFFFF" />
+            <Text className="text-white font-bold text-[11px] uppercase tracking-wider">Attendance</Text>
+          </Pressable>
+
+          <Pressable 
+            onPress={() => navigation.navigate('Academics')}
+            className="flex-row items-center gap-1.5 px-5 py-2.5 rounded-full mr-2 bg-white/10 border border-white/10"
+            style={styles.glassCard}
+          >
+            <FileText size={15} color="#A5B4FC" />
+            <Text className="text-[#A5B4FC] font-semibold text-[11px] uppercase tracking-wider">Homework</Text>
+          </Pressable>
+
+          <Pressable 
+            onPress={() => navigation.navigate('Academics')}
+            className="flex-row items-center gap-1.5 px-5 py-2.5 rounded-full mr-2 bg-white/10 border border-white/10"
+            style={styles.glassCard}
+          >
+            <Award size={15} color="#A5B4FC" />
+            <Text className="text-[#A5B4FC] font-semibold text-[11px] uppercase tracking-wider">Results</Text>
+          </Pressable>
+
+          <Pressable 
+            onPress={() => navigation.navigate('Fees')}
+            className="flex-row items-center gap-1.5 px-5 py-2.5 rounded-full mr-2 bg-white/10 border border-white/10"
+            style={styles.glassCard}
+          >
+            <CreditCard size={15} color="#A5B4FC" />
+            <Text className="text-[#A5B4FC] font-semibold text-[11px] uppercase tracking-wider">Fees</Text>
+          </Pressable>
+
+          <Pressable 
+            onPress={() => navigation.navigate('Bus')}
+            className="flex-row items-center gap-1.5 px-5 py-2.5 rounded-full mr-2 bg-white/10 border border-white/10"
+            style={styles.glassCard}
+          >
+            <Bus size={15} color="#A5B4FC" />
+            <Text className="text-[#A5B4FC] font-semibold text-[11px] uppercase tracking-wider">Bus Tracker</Text>
+          </Pressable>
+        </ScrollView>
+
+        {/* Fee Alert Banner */}
+        {pendingFeesCount > 0 && (
+          <View className="px-5 mb-6">
+            <LinearGradient
+              colors={['#5E5CE6', '#3B3B98']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.feeBanner}
+            >
+              <View className="absolute top-0 right-0 p-4 opacity-20">
+                <AlertTriangle size={72} color="#FFFFFF" />
               </View>
-              <View className="items-end">
-                <Text className="text-white font-black text-base">${fee.amount}</Text>
-                <Pressable
-                  onPress={() => navigation.navigate('FeePayment')}
-                  className={`mt-1.5 px-3 py-1 rounded-lg border ${
-                    fee.status === 'paid'
-                      ? 'bg-emerald-950/45 border-emerald-500/25'
-                      : 'bg-brand-indigo border-brand-indigo/35'
+              <Text className="text-white text-base font-bold font-headline-md">Fee Alert</Text>
+              <Text className="text-white/90 text-sm mt-1">
+                Term 2 fee {currentChild.id === 'stud_001' ? '₹18,000' : '₹12,000'} due in 7 days
+              </Text>
+              <Pressable 
+                onPress={() => navigation.navigate('Fees')}
+                className="mt-3 bg-white px-5 py-2 rounded-full self-start active:scale-95 shadow-sm"
+              >
+                <Text className="text-[#5E5CE6] font-bold text-xs">Pay Now →</Text>
+              </Pressable>
+            </LinearGradient>
+          </View>
+        )}
+
+        {/* Homework Section */}
+        <View className="px-5 mb-6">
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-white text-base font-bold font-headline-md">Homework Due Today</Text>
+            <Pressable onPress={() => navigation.navigate('Academics')}>
+              <Text className="text-[#818CF8] text-xs font-bold font-label-md">View All</Text>
+            </Pressable>
+          </View>
+
+          {homework.slice(0, 2).map((hw, idx) => (
+            <View 
+              key={hw.id}
+              style={styles.glassCard}
+              className="p-4 rounded-xl flex-row justify-between items-center mb-3 border border-white/10"
+            >
+              <View className="flex-row items-center gap-4 flex-1 mr-2">
+                <View 
+                  className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    idx === 0 ? 'bg-blue-500/20' : 'bg-purple-500/20'
                   }`}
                 >
-                  <Text className="text-white text-[9px] font-bold uppercase">{fee.status}</Text>
-                </Pressable>
+                  <FileText size={22} color={idx === 0 ? '#60a5fa' : '#c084fc'} />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-white font-semibold text-sm leading-tight" numberOfLines={1}>
+                    {hw.subject} - {hw.title}
+                  </Text>
+                  <Text className="text-red-400 font-semibold text-[10px] uppercase tracking-wider mt-1">
+                    Due 4:00 PM
+                  </Text>
+                </View>
               </View>
-            </GlassCard>
+              <ChevronRight size={18} color="rgba(255,255,255,0.3)" />
+            </View>
           ))}
         </View>
-      )}
 
-      {/* TAB 4: STUDENT LEAVES */}
-      {activeTab === 'leaves' && (
-        <View>
-          {/* Apply for leave */}
-          <GlassCard className="p-5 mb-6" intensity="high">
-            <View className="flex-row items-center mb-3">
-              <Calendar size={20} color="#F59E0B" />
-              <Text className="text-white text-base font-bold ml-2">Apply for Student Leave</Text>
-            </View>
-
-            <View className="flex-row justify-between">
-              <View className="w-[48%]">
-                <CustomInput
-                  label="From Date"
-                  value={leaveStartDate}
-                  onChangeText={setLeaveStartDate}
-                />
-              </View>
-              <View className="w-[48%]">
-                <CustomInput
-                  label="To Date"
-                  value={leaveEndDate}
-                  onChangeText={setLeaveEndDate}
-                />
+        {/* Bus Tracker Card */}
+        <View className="px-5 mb-6">
+          <Text className="text-white text-base font-bold font-headline-md mb-3">Live Bus Tracking</Text>
+          <View 
+            style={[styles.glassCard, styles.busCard]}
+            className="rounded-2xl overflow-hidden border border-white/10"
+          >
+            <View className="h-32 w-full relative">
+              <Image 
+                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBsrlIfVMFFa2P3mwXYGHD9lGeUxDUD7vCJYh_Zmz-dxQmtMhDnu974L3GPQWzT76Zv_Y_HDPPCGfCyhpM_lVfA2dhyrkJ6MpoiTZKbYZLmuzqnCxY66GcYOXpKh7_5o5ABVi748n7eriB2KwXpRxFOY8R2nfZns7ZwmL9NIWv3PVsATmL-NwizbA_tjDStVd8xxWe2BsdIpby-iUe9eNd0-aXwCKXjIXwjf_-jUhrUUvNnMuXWge43oWvQNK6EDijfjRjSFe14Ykdu' }}
+                className="w-full h-full opacity-60"
+                style={{ resizeMode: 'cover' }}
+              />
+              <LinearGradient
+                colors={['transparent', '#0E0F26']}
+                style={StyleSheet.absoluteFillObject}
+              />
+              <View className="absolute bottom-3 left-3 flex-row items-center gap-2">
+                <View className="w-2.5 h-2.5 bg-[#10B981] rounded-full" />
+                <Text className="text-white font-bold text-[11px] uppercase tracking-wider shadow-md">
+                  Bus 42B - Route North
+                </Text>
               </View>
             </View>
-
-            <CustomInput
-              label="Reason Details"
-              placeholder="e.g. Vacation, sickness note upload..."
-              value={leaveReason}
-              onChangeText={setLeaveReason}
-              multiline
-              numberOfLines={2}
-            />
-
-            <InteractiveButton
-              onPress={handleApplyStudentLeave}
-              title="Submit Leave Application"
-              variant="secondary"
-            />
-          </GlassCard>
-
-          {/* Past leaves list */}
-          <Text className="text-white/80 text-sm font-semibold mb-3 ml-1">Leave Request History</Text>
-          {studentLeaves.map((leave) => (
-            <GlassCard key={leave.id} className="p-4 mb-3 flex-row justify-between items-center" intensity="medium">
-              <View>
-                <Text className="text-white font-bold text-sm">{leave.reason}</Text>
-                <Text className="text-white/40 text-[10px] mt-0.5">{leave.startDate} to {leave.endDate}</Text>
+            <View className="flex-row justify-between items-center p-4">
+              <View className="flex-row items-center gap-2">
+                <Bus size={18} color="#818CF8" />
+                <Text className="text-white font-semibold text-xs">Bus arrives in 12 min</Text>
               </View>
-              <View className="bg-emerald-950/45 border border-emerald-500/25 px-2.5 py-1 rounded-xl">
-                <Text className="text-emerald-450 font-bold text-[9px] uppercase">{leave.status}</Text>
-              </View>
-            </GlassCard>
-          ))}
+              <Pressable onPress={() => navigation.navigate('Bus')}>
+                <Text className="text-[#5E5CE6] font-bold text-xs underline">Track Live</Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
-      )}
-    </ScrollView>
+
+        {/* Announcements Feed */}
+        <View className="px-5 mb-8">
+          <Text className="text-white text-base font-bold font-headline-md mb-3">Latest Announcements</Text>
+          {/* Card 1 */}
+          <View style={styles.glassCard} className="p-4 rounded-xl flex-row gap-4 mb-3 border border-white/10">
+            <View className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+              <ShieldCheck size={20} color="#818CF8" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-white font-bold text-sm leading-tight">Annual Day Notice 2024</Text>
+              <Text className="text-white/70 text-xs mt-1 leading-normal">
+                Costumes for the cultural program must be collected by Friday evening from the respective class teachers.
+              </Text>
+              <View className="mt-2 bg-[#5E5CE6]/15 border border-[#5E5CE6]/25 px-2.5 py-0.5 rounded self-start">
+                <Text className="text-[#818CF8] text-[9px] font-bold uppercase tracking-wider">School Admin</Text>
+              </View>
+            </View>
+          </View>
+ 
+          {/* Card 2 */}
+          <View style={styles.glassCard} className="p-4 rounded-xl flex-row gap-4 mb-3 border border-white/10">
+            <View className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+              <FlaskConical size={20} color="#34D399" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-white font-bold text-sm leading-tight">Science Fair Registration</Text>
+              <Text className="text-white/70 text-xs mt-1 leading-normal">
+                Students of Grade 8 are invited to submit their innovative projects for the regional Science Fair. Registrations close Monday.
+              </Text>
+              <View className="mt-2 bg-[#10B981]/15 border border-[#10B981]/25 px-2.5 py-0.5 rounded self-start">
+                <Text className="text-[#34D399] text-[9px] font-bold uppercase tracking-wider">Academic Cell</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* FAB Chat Button */}
+      <Pressable 
+        onPress={() => navigation.navigate('Messages')}
+        style={styles.fab}
+        className="active:scale-90 shadow-2xl"
+      >
+        <MessageCircle size={24} color="#FFFFFF" />
+      </Pressable>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
+  container: {
     flex: 1,
-    backgroundColor: '#0B0F19',
+    backgroundColor: '#0E0F26',
   },
-  contentContainer: {
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 65 : 52,
+    paddingBottom: 15,
     paddingHorizontal: 20,
-    paddingVertical: 24,
-    paddingBottom: 40,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    zIndex: 50,
+  },
+  scrollContent: {
+    paddingTop: 16,
+    paddingBottom: 110,
+  },
+  glassCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  attendanceCard: {
+    borderRadius: 16,
+    shadowColor: '#22c55e',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: Platform.OS === 'ios' ? 4 : 0,
+  },
+  feeBanner: {
+    borderRadius: 16,
+    padding: 16,
+    position: 'relative',
+    overflow: 'hidden',
+    shadowColor: '#5E5CE6',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: Platform.OS === 'ios' ? 8 : 0,
+  },
+  busCard: {
+    borderRadius: 20,
+    shadowColor: '#5E5CE6',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: Platform.OS === 'ios' ? 6 : 0,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 115 : 105,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#5E5CE6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#5E5CE6',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: Platform.OS === 'ios' ? 8 : 0,
+    zIndex: 99,
   },
 });
 

@@ -8,7 +8,7 @@ import { CustomTabBar } from '../components/CustomTabBar';
 // Icons
 import { 
   Home, Bell, Calendar, User, MessageCircle, 
-  School, Banknote, Bus, ClipboardCheck, 
+  GraduationCap, Banknote, Bus, ClipboardCheck, 
   ClipboardList, Star, CalendarOff, Users, 
   BarChart, Megaphone, Settings, FileText 
 } from 'lucide-react-native';
@@ -111,11 +111,12 @@ const TeacherTabs = () => (
 
 const ParentTabs = () => (
   <Tab.Navigator tabBar={(props) => <CustomTabBar {...props} />} screenOptions={{ tabBarHideOnKeyboard: true }}>
-    <Tab.Screen name="Dashboard" component={ParentDashboard} options={getTabOptions(Home, '#ff516a')} />
-    <Tab.Screen name="Academics" component={ReportCardScreen} options={getTabOptions(School, '#ff516a')} />
-    <Tab.Screen name="Fees" component={FeePaymentScreen} options={getTabOptions(Banknote, '#ff516a')} />
-    <Tab.Screen name="Bus" component={BusTrackingScreen} options={getTabOptions(Bus, '#ff516a')} />
-    <Tab.Screen name="Messages" component={MessagingScreen} options={getTabOptions(MessageCircle, '#ff516a')} />
+    <Tab.Screen name="Dashboard" component={ParentDashboard} options={getTabOptions(Home, '#5E5CE6')} />
+    <Tab.Screen name="Attendance" component={AttendanceHistoryScreen} options={getTabOptions(Calendar, '#5E5CE6')} />
+    <Tab.Screen name="Academics" component={ReportCardScreen} options={getTabOptions(GraduationCap, '#10B981')} />
+    <Tab.Screen name="Fees" component={FeePaymentScreen} options={getTabOptions(Banknote, '#10B981')} />
+    <Tab.Screen name="Bus" component={BusTrackingScreen} options={getTabOptions(Bus, '#5E5CE6')} />
+    <Tab.Screen name="Messages" component={MessagingScreen} options={getTabOptions(MessageCircle, '#5E5CE6')} />
   </Tab.Navigator>
 );
 
@@ -181,6 +182,7 @@ const RoleStackComponent = () => {
       <Stack.Screen name="PortalTools" component={PortalToolsScreen} />
       <Stack.Screen name="FacultyShowcase" component={FacultyShowcaseScreen} />
       <Stack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} />
+      <Stack.Screen name="StudentProfileDetails" component={ProfileScreen} />
     </Stack.Navigator>
   );
 };

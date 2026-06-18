@@ -30,6 +30,7 @@ export const CustomTabBar = ({
   const getGradientColors = () => {
     if (role === "admin_staff") return ["#0d2a24", "#121414"] as const;
     if (role === "teacher") return ["#121212", "#0d0d12"] as const;
+    if (role === "parent") return ["#16162D", "#0A0A1F"] as const;
     return ["#1c2222", "#101415"] as const;
   };
 
@@ -45,6 +46,16 @@ export const CustomTabBar = ({
               shadowRadius: 22,
               elevation: 24,
               overflow: "visible",
+            }
+          : role === "parent"
+          ? {
+              shadowColor: "#5E5CE6",
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0.25,
+              shadowRadius: 20,
+              elevation: 24,
+              overflow: "visible",
+              borderColor: "rgba(255, 255, 255, 0.15)",
             }
           : {},
       ]}
@@ -88,12 +99,14 @@ export const CustomTabBar = ({
           };
 
           const isTeacher = role === "teacher";
-          const themeColor = options.tabBarActiveTintColor || "#ddb7ff";
+          const isParent = role === "parent";
+          const hasManyTabs = state.routes.length > 5;
+          const themeColor = options.tabBarActiveTintColor || (isParent ? "#5E5CE6" : "#ddb7ff");
 
-          const activeColor = isTeacher ? themeColor : "#0F172A";
-          const inactiveColor = isTeacher ? "rgba(207, 194, 214, 0.6)" : "#8a9996";
+          const activeColor = (isParent || isTeacher) ? themeColor : "#0F172A";
+          const inactiveColor = isParent ? "rgba(255, 255, 255, 0.4)" : isTeacher ? "rgba(207, 194, 214, 0.6)" : "#8a9996";
 
-          const activeStyle = isTeacher
+          const activeStyle = (isTeacher || isParent)
             ? { backgroundColor: "transparent" }
             : {
                 backgroundColor: themeColor,
@@ -111,7 +124,7 @@ export const CustomTabBar = ({
               onPress={onPress}
               style={[
                 styles.tabItem,
-                isTeacher && { paddingHorizontal: 4, marginHorizontal: 1 },
+                hasManyTabs && { paddingHorizontal: 4, marginHorizontal: 1 },
                 isFocused ? activeStyle : styles.tabItemInactive,
               ]}
             >
@@ -122,12 +135,14 @@ export const CustomTabBar = ({
                   size: 20,
                 })}
               <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
                 style={{
                   color: isFocused ? activeColor : inactiveColor,
-                  fontSize: 10,
+                  fontSize: hasManyTabs ? 9 : 10,
                   marginTop: 4,
                   fontWeight: isFocused ? "bold" : "600",
-                  letterSpacing: 0.5,
+                  letterSpacing: hasManyTabs ? 0.1 : 0.5,
                 }}
               >
                 {label as string}

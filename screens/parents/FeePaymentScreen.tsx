@@ -1,116 +1,429 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, Image, StyleSheet, Dimensions, Platform, Alert, ActivityIndicator, Modal } from 'react-native';
 import { useAuthStore } from '../../store/useAuthStore';
-import { mockFees, FeeItem } from '../../services/mockData';
-import { GlassCard } from '../../components/GlassCard';
-import { InteractiveButton } from '../../components/InteractiveButton';
-import { CreditCard, FileDown, CheckCircle, ArrowLeft } from 'lucide-react-native';
+import { mockFees } from '../../services/mockData';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
+import {
+  ChevronLeft,
+  Bell,
+  Download,
+  CreditCard,
+  ChevronDown,
+  ChevronUp,
+  History,
+  Sparkles,
+  X,
+  ArrowRight,
+  ShieldAlert,
+  Wallet,
+  Building
+} from 'lucide-react-native';
 
-export const FeePaymentScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { activeChildId } = useAuthStore();
-  const [fees, setFees] = useState<FeeItem[]>(mockFees[activeChildId || 'stud_001'] || []);
-  const [payingId, setPayingId] = useState<string | null>(null);
+const { width } = Dimensions.get('window');
 
-  const handlePayment = (feeId: string, title: string, amount: number) => {
-    Alert.alert(
-      "Confirm Fee Settle",
-      `Authorize payment of $${amount} for "${title}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Settle Payment",
-          onPress: () => simulatePayment(feeId)
-        }
-      ]
-    );
-  };
+export const FeePaymentScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
+  const { user, activeChildId } = useAuthStore();
+  const [showModal, setShowModal] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState<'upi' | 'card' | 'net'>('upi');
+  const [isPaying, setIsPaying] = useState(false);
+  const [term2Status, setTerm2Status] = useState<'due' | 'paid'>('due');
+  const [breakdownOpen, setBreakdownOpen] = useState(true);
 
-  const simulatePayment = (feeId: string) => {
-    setPayingId(feeId);
+  if (!user || !user.children) return null;
+
+  const currentChild = user.children.find(c => c.id === activeChildId) || user.children[0];
+
+  // Adjust values based on child
+  const amount = currentChild.id === 'stud_001' ? 18000 : 12000;
+  const t1Amount = currentChild.id === 'stud_001' ? 18000 : 12000;
+  const t3Amount = currentChild.id === 'stud_001' ? 18000 : 12000;
+
+  const handlePayNow = () => {
+    setIsPaying(true);
     setTimeout(() => {
-      setFees(prev => prev.map(f => f.id === feeId ? { ...f, status: 'paid' } : f));
-      setPayingId(null);
-      Alert.alert("Payment Verified", "Transaction approved! Invoice receipt downloaded to secure storage.");
-    }, 1500);
-  };
-
-  const getStatusStyle = (status: string) => {
-    if (status === 'paid') return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-    if (status === 'overdue') return 'bg-red-500/20 text-red-400 border-red-500/30';
-    return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+      setIsPaying(false);
+      setShowModal(false);
+      setTerm2Status('paid');
+      Alert.alert(
+        "Payment Approved",
+        "Transaction verified successfully! Receipt has been sent to your registered email address.",
+        [{ text: "OK" }]
+      );
+    }, 1800);
   };
 
   return (
-    <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
-      <View className="flex-row items-center mb-6">
-        <Pressable onPress={() => navigation.goBack()} className="p-3 bg-white/5 border border-white/10 rounded-2xl">
-          <ArrowLeft size={20} color="#FFFFFF" />
+    <View style={styles.container}>
+      {/* Background Gradient */}
+      <LinearGradient
+        colors={['#0E0F26', '#121330']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <View className="flex-row items-center gap-3">
+          <Pressable onPress={() => navigation?.goBack()} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 active:scale-95">
+            <ChevronLeft size={20} color="#818CF8" />
+          </Pressable>
+          <View>
+            <Text className="text-white text-lg font-bold font-headline-md">Good Morning, Ramesh 👋</Text>
+            <Text className="text-white/50 text-xs font-semibold mt-0.5">
+              {currentChild.name}'s Fees | Class {currentChild.class.replace('Grade ', '')} | 2025-26
+            </Text>
+          </View>
+        </View>
+        <Pressable className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 active:scale-95">
+          <Bell size={20} color="#5E5CE6" />
         </Pressable>
-        <Text className="text-white text-xl font-bold ml-4">Tuition & Accounts</Text>
       </View>
 
-      <Text className="text-white/80 text-sm font-semibold mb-3 ml-1">Outstanding Invoices</Text>
-      {fees.filter(f => f.status !== 'paid').map((fee) => (
-        <GlassCard key={fee.id} className="p-5 mb-4 border-l-4 border-l-amber-400" intensity="high">
-          <View className="flex-row justify-between items-start mb-2">
-            <View className="flex-1 mr-2">
-              <Text className="text-white font-bold text-base">{fee.title}</Text>
-              <Text className="text-white/50 text-xs font-semibold uppercase">{fee.category} • Due {fee.dueDate}</Text>
-            </View>
-            <View className={`px-2 py-0.5 rounded border ${getStatusStyle(fee.status)}`}>
-              <Text className="font-bold text-[9px] uppercase">{fee.status}</Text>
-            </View>
-          </View>
-          
-          <View className="flex-row justify-between items-center mt-4 pt-4 border-t border-white/5">
-            <Text className="text-white text-2xl font-black">${fee.amount}</Text>
-            {payingId === fee.id ? (
-              <View className="bg-brand-indigo px-6 py-2.5 rounded-xl">
-                <ActivityIndicator size="small" color="#FFFFFF" />
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Payment Timeline */}
+        <View className="mb-6">
+          <Text className="text-[#A5B4FC] text-base font-bold font-headline-md mb-3 px-5">Payment Timeline</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            className="pl-5"
+            contentContainerStyle={{ paddingRight: 30 }}
+          >
+            {/* Card 1: Term 1 (Paid) */}
+            <View style={styles.glassCard} className="w-72 p-4 rounded-2xl mr-4 gap-4 border border-white/10">
+              <View className="flex-row justify-between items-center">
+                <View className="bg-green-500/20 px-3 py-1 rounded-full border border-green-500/30">
+                  <Text className="text-green-400 font-bold text-[9px] uppercase tracking-wider">✅ Paid</Text>
+                </View>
+                <Text className="text-white/40 text-xs font-semibold">Term 1</Text>
               </View>
-            ) : (
-              <Pressable
-                onPress={() => handlePayment(fee.id, fee.title, fee.amount)}
-                className="bg-brand-indigo px-5 py-2.5 rounded-xl"
-              >
-                <Text className="text-white font-bold text-xs">Pay Online</Text>
+              <View>
+                <Text className="text-white text-2xl font-black">₹{t1Amount.toLocaleString('en-IN')}</Text>
+                <Text className="text-white/50 text-xs font-semibold mt-1">Cleared on Aug 12, 2024</Text>
+              </View>
+              <Pressable className="w-full py-2.5 rounded-lg border border-white/10 flex-row items-center justify-center gap-2 active:scale-95">
+                <Download size={14} color="#FFFFFF" />
+                <Text className="text-white text-xs font-semibold">Download Receipt</Text>
               </Pressable>
+            </View>
+
+            {/* Card 2: Term 2 (Due / Paid) */}
+            <View 
+              style={[
+                styles.glassCard, 
+                term2Status === 'due' ? styles.dueCardBorder : {}
+              ]} 
+              className="w-72 p-4 rounded-2xl mr-4 gap-4 border border-white/10"
+            >
+              <View className="flex-row justify-between items-center">
+                <View 
+                  className={`px-3 py-1 rounded-full border ${
+                    term2Status === 'due' 
+                      ? 'bg-amber-500/20 border-amber-500/30' 
+                      : 'bg-green-500/20 border-green-500/30'
+                  }`}
+                >
+                  <Text className={`font-bold text-[9px] uppercase tracking-wider ${
+                    term2Status === 'due' ? 'text-amber-400' : 'text-green-400'
+                  }`}>
+                    {term2Status === 'due' ? '⚠️ Due' : '✅ Paid'}
+                  </Text>
+                </View>
+                <Text className="text-white/40 text-xs font-semibold">Term 2</Text>
+              </View>
+              <View>
+                <Text className="text-white text-2xl font-black">₹{amount.toLocaleString('en-IN')}</Text>
+                <Text className={`text-xs font-semibold mt-1 ${term2Status === 'due' ? 'text-amber-400' : 'text-white/50'}`}>
+                  {term2Status === 'due' ? 'Due by Jan 15, 2025' : 'Cleared just now'}
+                </Text>
+              </View>
+              {term2Status === 'due' ? (
+                <Pressable 
+                  onPress={() => setShowModal(true)}
+                  className="w-full py-2.5 rounded-lg bg-[#10B981] flex-row items-center justify-center gap-2 active:scale-95 shadow-md shadow-[#10B981]/30"
+                >
+                  <CreditCard size={14} color="#FFFFFF" />
+                  <Text className="text-white text-xs font-bold">Pay Now</Text>
+                </Pressable>
+              ) : (
+                <Pressable className="w-full py-2.5 rounded-lg border border-white/10 flex-row items-center justify-center gap-2 active:scale-95">
+                  <Download size={14} color="#FFFFFF" />
+                  <Text className="text-white text-xs font-semibold">Download Receipt</Text>
+                </Pressable>
+              )}
+            </View>
+
+            {/* Card 3: Term 3 (Upcoming) */}
+            <View style={styles.glassCard} className="w-72 p-4 rounded-2xl mr-4 gap-4 border border-white/10 opacity-60">
+              <View className="flex-row justify-between items-center">
+                <View className="bg-white/10 px-3 py-1 rounded-full">
+                  <Text className="text-white/50 font-bold text-[9px] uppercase tracking-wider">🔒 Upcoming</Text>
+                </View>
+                <Text className="text-white/40 text-xs font-semibold">Term 3</Text>
+              </View>
+              <View>
+                <Text className="text-white text-2xl font-black">₹{t3Amount.toLocaleString('en-IN')}</Text>
+                <Text className="text-white/50 text-xs font-semibold mt-1">Opening April 2025</Text>
+              </View>
+              <View className="w-full py-2.5 items-center justify-center">
+                <Text className="text-white/30 text-xs italic font-semibold">Unavailable</Text>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+
+        {/* Fee Breakdown Accordion */}
+        <View className="px-5 mb-6">
+          <Text className="text-[#A5B4FC] text-base font-bold font-headline-md mb-3">Fee Breakdown</Text>
+          <View style={styles.glassCard} className="rounded-2xl border border-white/10 overflow-hidden">
+            <Pressable 
+              onPress={() => setBreakdownOpen(!breakdownOpen)}
+              className="p-4 flex-row justify-between items-center bg-white/5 border-b border-white/5"
+            >
+              <Text className="text-white font-bold text-sm">Academic Year 2025-26</Text>
+              {breakdownOpen ? <ChevronUp size={18} color="#10B981" /> : <ChevronDown size={18} color="#10B981" />}
+            </Pressable>
+
+            {breakdownOpen && (
+              <View className="p-4 gap-3">
+                <View className="flex-row justify-between">
+                  <Text className="text-white/60 text-xs font-semibold">Tuition Fee</Text>
+                  <Text className="text-white text-xs font-bold">
+                    ₹{(amount * 12 / 18).toLocaleString('en-IN')}
+                  </Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-white/60 text-xs font-semibold">Transport</Text>
+                  <Text className="text-white text-xs font-bold">
+                    ₹{(amount * 3.5 / 18).toLocaleString('en-IN')}
+                  </Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-white/60 text-xs font-semibold">Activity Fee</Text>
+                  <Text className="text-white text-xs font-bold">
+                    ₹{(amount * 2.5 / 18).toLocaleString('en-IN')}
+                  </Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-white/60 text-xs font-semibold">Exam Fee</Text>
+                  <Text className="text-white text-xs font-bold">
+                    ₹{(amount * 0.5 / 18).toLocaleString('en-IN')}
+                  </Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-white/60 text-xs font-semibold">Library Fee</Text>
+                  <Text className="text-white text-xs font-bold">
+                    ₹{(amount * 0.5 / 18).toLocaleString('en-IN')}
+                  </Text>
+                </View>
+                <View className="pt-3 mt-2 border-t border-white/10 flex-row justify-between">
+                  <Text className="text-[#10B981] font-black text-sm">Total Amount</Text>
+                  <Text className="text-[#10B981] font-black text-sm">₹{amount.toLocaleString('en-IN')}</Text>
+                </View>
+              </View>
             )}
           </View>
-        </GlassCard>
-      ))}
+        </View>
 
-      <Text className="text-white/80 text-sm font-semibold mb-3 mt-4 ml-1">Payment History</Text>
-      {fees.filter(f => f.status === 'paid').map((fee) => (
-        <GlassCard key={fee.id} className="p-4 mb-3 flex-row justify-between items-center" intensity="medium">
-          <View>
-            <Text className="text-white font-bold text-sm">{fee.title}</Text>
-            <Text className="text-white/50 text-[10px] uppercase font-semibold mt-0.5">{fee.category} • Settle Auto</Text>
+        {/* Insights Section */}
+        <View className="px-5 mb-8 flex-row gap-4">
+          <View style={styles.glassCard} className="flex-1 p-4 rounded-2xl border border-white/10 items-center gap-1.5">
+            <View className="w-11 h-11 rounded-full bg-[#5E5CE6]/15 flex items-center justify-center">
+              <History size={20} color="#818CF8" />
+            </View>
+            <Text className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Payment History</Text>
+            <Text className="text-white font-bold text-sm">4 Records</Text>
           </View>
-          <View className="flex-row items-center">
-            <Text className="text-emerald-400 font-extrabold text-sm mr-3">${fee.amount}</Text>
-            <Pressable
-              onPress={() => Alert.alert("Receipt Generated", "PDF Receipt successfully compiled and shared.")}
-              className="bg-white/10 p-2 rounded-xl border border-white/10"
+
+          <View style={styles.glassCard} className="flex-1 p-4 rounded-2xl border border-white/10 items-center gap-1.5">
+            <View className="w-11 h-11 rounded-full bg-[#10B981]/15 flex items-center justify-center">
+              <Sparkles size={20} color="#34D399" />
+            </View>
+            <Text className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Scholarship</Text>
+            <Text className="text-white font-bold text-sm">15% Off</Text>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Payment Overlay Modal */}
+      <Modal
+        visible={showModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowModal(false)}
+      >
+        <Pressable 
+          onPress={() => setShowModal(false)} 
+          style={styles.modalOverlay}
+        >
+          <Pressable 
+            onPress={(e) => e.stopPropagation()} 
+            style={[styles.glassCard, styles.modalContent]}
+          >
+            {/* Close button */}
+            <Pressable 
+              onPress={() => setShowModal(false)}
+              className="absolute right-4 top-4 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 active:scale-90"
             >
-              <FileDown size={14} color="#FFFFFF" />
+              <X size={16} color="#FFFFFF" />
             </Pressable>
-          </View>
-        </GlassCard>
-      ))}
-    </ScrollView>
+
+            {/* Title / Info */}
+            <View className="items-center gap-1 mb-6">
+              <Text className="text-[#10B981] text-lg font-bold">Complete Payment</Text>
+              <Text className="text-white/50 text-xs font-semibold">Term 2 Fee for {currentChild.name}</Text>
+              <Text className="text-white text-3xl font-black mt-2">₹{amount.toLocaleString('en-IN')}</Text>
+            </View>
+
+            {/* Payment Method Selectors */}
+            <View className="gap-3 mb-6">
+              <Text className="text-white/45 text-[10px] font-bold uppercase tracking-widest px-1">Select Payment Method</Text>
+              
+              {/* UPI */}
+              <Pressable 
+                onPress={() => setSelectedMethod('upi')}
+                className={`p-3 rounded-xl flex-row items-center justify-between border ${
+                  selectedMethod === 'upi' ? 'bg-[#10B981]/10 border-[#10B981]' : 'bg-white/5 border-white/10'
+                }`}
+              >
+                <View className="flex-row items-center gap-3">
+                  <View className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+                    <Wallet size={18} color="#34D399" />
+                  </View>
+                  <View>
+                    <Text className="text-white font-bold text-xs">UPI</Text>
+                    <Text className="text-white/40 text-[9px] mt-0.5">Google Pay, PhonePe, BHIM</Text>
+                  </View>
+                </View>
+                <View className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
+                  selectedMethod === 'upi' ? 'border-[#10B981]' : 'border-white/30'
+                }`}>
+                  {selectedMethod === 'upi' && <View className="w-2.5 h-2.5 bg-[#10B981] rounded-full" />}
+                </View>
+              </Pressable>
+
+              {/* Cards */}
+              <Pressable 
+                onPress={() => setSelectedMethod('card')}
+                className={`p-3 rounded-xl flex-row items-center justify-between border ${
+                  selectedMethod === 'card' ? 'bg-[#10B981]/10 border-[#10B981]' : 'bg-white/5 border-white/10'
+                }`}
+              >
+                <View className="flex-row items-center gap-3">
+                  <View className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+                    <CreditCard size={18} color="#34D399" />
+                  </View>
+                  <View>
+                    <Text className="text-white font-bold text-xs">Debit/Credit Card</Text>
+                    <Text className="text-white/40 text-[9px] mt-0.5">Visa, Mastercard, RuPay</Text>
+                  </View>
+                </View>
+                <View className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
+                  selectedMethod === 'card' ? 'border-[#10B981]' : 'border-white/30'
+                }`}>
+                  {selectedMethod === 'card' && <View className="w-2.5 h-2.5 bg-[#10B981] rounded-full" />}
+                </View>
+              </Pressable>
+
+              {/* Net Banking */}
+              <Pressable 
+                onPress={() => setSelectedMethod('net')}
+                className={`p-3 rounded-xl flex-row items-center justify-between border ${
+                  selectedMethod === 'net' ? 'bg-[#10B981]/10 border-[#10B981]' : 'bg-white/5 border-white/10'
+                }`}
+              >
+                <View className="flex-row items-center gap-3">
+                  <View className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+                    <Building size={18} color="#34D399" />
+                  </View>
+                  <View>
+                    <Text className="text-white font-bold text-xs">Net Banking</Text>
+                    <Text className="text-white/40 text-[9px] mt-0.5">All major Indian banks</Text>
+                  </View>
+                </View>
+                <View className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
+                  selectedMethod === 'net' ? 'border-[#10B981]' : 'border-white/30'
+                }`}>
+                  {selectedMethod === 'net' && <View className="w-2.5 h-2.5 bg-[#10B981] rounded-full" />}
+                </View>
+              </Pressable>
+            </View>
+
+            {/* Action button */}
+            <Pressable 
+              onPress={handlePayNow}
+              disabled={isPaying}
+              className="w-full py-4 rounded-xl bg-[#10B981] flex-row items-center justify-center gap-2 active:scale-95 shadow-lg shadow-[#10B981]/30 mb-2"
+            >
+              {isPaying ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <Text className="text-white font-bold text-sm uppercase tracking-wide">
+                    Pay ₹{amount.toLocaleString('en-IN')}
+                  </Text>
+                  <ArrowRight size={16} color="#FFFFFF" />
+                </>
+              )}
+            </Pressable>
+            <Text className="text-center text-[10px] text-white/30 font-semibold uppercase tracking-wider">
+              Secured by 256-bit SSL encryption
+            </Text>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
+  container: {
     flex: 1,
-    backgroundColor: '#0B0F19',
+    backgroundColor: '#0E0F26',
   },
-  contentContainer: {
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 65 : 52,
+    paddingBottom: 15,
     paddingHorizontal: 20,
-    paddingVertical: 24,
-    paddingBottom: 40,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    zIndex: 50,
+  },
+  scrollContent: {
+    paddingTop: 16,
+    paddingBottom: 100,
+  },
+  glassCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  dueCardBorder: {
+    borderColor: 'rgba(16, 185, 129, 0.4)',
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: Platform.OS === 'ios' ? 6 : 0,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(14, 15, 38, 0.85)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#16162D',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
 });
 
