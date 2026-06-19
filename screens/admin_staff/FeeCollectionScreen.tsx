@@ -5,9 +5,24 @@ import { useNavigation } from '@react-navigation/native';
 import { GlassCard } from '../../components/GlassCard';
 import { AdminStaffHeader } from '../../components/AdminStaffHeader';
 import { Search, Filter, BookOpen, Bus, Globe, ChevronDown, Calendar, Printer, UserCircle } from 'lucide-react-native';
+import { useFeeStore } from '../../store/useFeeStore';
 
 export const FeeCollectionScreen: React.FC<any> = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const { categories, feeData } = useFeeStore();
+  
+  // Map student (Aman Gupta, Class 10) to store data
+  const classFeeInfo = feeData.find(f => f.grade === 'Class 10') || feeData[9];
+  const totalClassFeeAnnual = Object.values(classFeeInfo.fees).reduce((sum, val) => sum + val, 0);
+  const totalRupees = Math.round(totalClassFeeAnnual * 2.2);
+  const outstandingRupees = Math.round(totalRupees * 0.69); // ~69% is outstanding
+  
+  const getIconForCategory = (key: string) => {
+    if (key === 'tuition') return <BookOpen size={20} color="#34D399" className="mr-3" />;
+    if (key === 'transport') return <Bus size={20} color="#34D399" className="mr-3" />;
+    return <Globe size={20} color="#34D399" className="mr-3" />;
+  };
 
   return (
     <View style={styles.container}>
@@ -64,45 +79,29 @@ export const FeeCollectionScreen: React.FC<any> = ({ navigation }) => {
           
           <Text className="text-white/60 text-[10px] font-bold tracking-wider mb-1">TOTAL OUTSTANDING BALANCE</Text>
           <View className="flex-row items-end">
-            <Text className="text-[#ffcc00] text-4xl font-bold tracking-tighter">₹12,450</Text>
-            <Text className="text-white/40 text-sm line-through ml-2 mb-1.5 font-semibold">₹18,000</Text>
+            <Text className="text-[#ffcc00] text-4xl font-bold tracking-tighter">₹{outstandingRupees.toLocaleString('en-IN')}</Text>
+            <Text className="text-white/40 text-sm line-through ml-2 mb-1.5 font-semibold">₹{totalRupees.toLocaleString('en-IN')}</Text>
           </View>
         </GlassCard>
 
         {/* Fee Breakdown */}
         <View className="mb-6">
-          <GlassCard intensity="low" className="flex-row items-center justify-between p-4 mb-2">
-            <View className="flex-row items-center">
-              <BookOpen size={20} color="#34D399" className="mr-3" />
-              <Text className="text-white text-base">Tuition Fee</Text>
-            </View>
-            <View className="flex-row items-center">
-              <Text className="text-white text-xl font-bold mr-3">₹8,000</Text>
-              <ChevronDown size={20} color="#ffffff" opacity={0.5} />
-            </View>
-          </GlassCard>
-
-          <GlassCard intensity="low" className="flex-row items-center justify-between p-4 mb-2">
-            <View className="flex-row items-center">
-              <Bus size={20} color="#34D399" className="mr-3" />
-              <Text className="text-white text-base">Transport Fee</Text>
-            </View>
-            <View className="flex-row items-center">
-              <Text className="text-white text-xl font-bold mr-3">₹2,500</Text>
-              <ChevronDown size={20} color="#ffffff" opacity={0.5} />
-            </View>
-          </GlassCard>
-
-          <GlassCard intensity="low" className="flex-row items-center justify-between p-4 mb-2">
-            <View className="flex-row items-center">
-              <Globe size={20} color="#34D399" className="mr-3" />
-              <Text className="text-white text-base">Activity & Library</Text>
-            </View>
-            <View className="flex-row items-center">
-              <Text className="text-white text-xl font-bold mr-3">₹1,950</Text>
-              <ChevronDown size={20} color="#ffffff" opacity={0.5} />
-            </View>
-          </GlassCard>
+          {categories.map(cat => {
+            const catAmountAnnual = classFeeInfo.fees[cat.key] || 0;
+            const catAmountRupees = Math.round(catAmountAnnual * 2.2);
+            return (
+              <GlassCard key={cat.key} intensity="low" className="flex-row items-center justify-between p-4 mb-2">
+                <View className="flex-row items-center">
+                  {getIconForCategory(cat.key)}
+                  <Text className="text-white text-base">{cat.label}</Text>
+                </View>
+                <View className="flex-row items-center">
+                  <Text className="text-white text-xl font-bold mr-3">₹{catAmountRupees.toLocaleString('en-IN')}</Text>
+                  <ChevronDown size={20} color="#ffffff" opacity={0.5} />
+                </View>
+              </GlassCard>
+            );
+          })}
         </View>
 
         {/* Record Cash Payment Form */}

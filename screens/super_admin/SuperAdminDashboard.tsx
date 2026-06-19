@@ -194,7 +194,7 @@ export const SuperAdminDashboard: React.FC = () => {
 
             {/* Action 2: Fee Structure */}
             <Pressable 
-              onPress={() => navigation.navigate('FeeStructure')}
+              onPress={() => navigation.navigate('AssignFeeStructure')}
               className="w-[31%] bg-white/5 border border-white/10 rounded-2xl p-4 items-center justify-center mb-3 active:scale-95"
             >
               <Banknote size={24} color="#ffe5a0" />

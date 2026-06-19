@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, Platform } from 'react-native';
+import { StyleSheet, View, Text, Pressable, ScrollView, Alert, ActivityIndicator, Platform, Modal } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -7,7 +7,7 @@ import { useAuthStore, UserRole } from '../../store/useAuthStore';
 import { CustomInput } from '../../components/CustomInput';
 import { InteractiveButton } from '../../components/InteractiveButton';
 import { GlassCard } from '../../components/GlassCard';
-import { Mail, Lock, CheckCircle, Users, GraduationCap, Briefcase, Shield, Compass } from 'lucide-react-native';
+import { Mail, Lock, CheckCircle, Users, GraduationCap, Briefcase, Shield, Compass, AlertTriangle } from 'lucide-react-native';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email format" }),
@@ -29,6 +29,23 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
   });
 
+  // Custom alert dialog state
+  const [customAlert, setCustomAlert] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'error',
+  });
+
+  const showCustomAlert = (title: string, message: string, type: 'success' | 'error') => {
+    setCustomAlert({ visible: true, title, message, type });
+  };
+
   interface RoleConfig {
     role: UserRole;
     label: string;
@@ -48,7 +65,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       description: 'Student progress & portal',
       colorClass: 'text-pink-400',
       borderClass: 'border-pink-500/50',
-      bgClass: 'bg-pink-500/10',
+      bgClass: 'bg-pink-500/20',
       glowColor: 'rgba(236, 72, 153, 0.45)',
       activeColor: '#EC4899',
       icon: Users,
@@ -59,7 +76,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       description: 'Classroom & grading portal',
       colorClass: 'text-blue-400',
       borderClass: 'border-blue-500/50',
-      bgClass: 'bg-blue-500/10',
+      bgClass: 'bg-blue-500/20',
       glowColor: 'rgba(59, 130, 246, 0.45)',
       activeColor: '#3B82F6',
       icon: GraduationCap,
@@ -70,7 +87,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       description: 'Campus ops & finance',
       colorClass: 'text-emerald-400',
       borderClass: 'border-emerald-500/50',
-      bgClass: 'bg-emerald-500/10',
+      bgClass: 'bg-emerald-500/20',
       glowColor: 'rgba(16, 185, 129, 0.45)',
       activeColor: '#10B981',
       icon: Briefcase,
@@ -81,7 +98,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       description: 'Full system configs',
       colorClass: 'text-purple-400',
       borderClass: 'border-purple-500/50',
-      bgClass: 'bg-purple-500/10',
+      bgClass: 'bg-purple-500/20',
       glowColor: 'rgba(139, 92, 246, 0.45)',
       activeColor: '#8B5CF6',
       icon: Shield,
@@ -92,7 +109,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       description: 'Explore the public showcase',
       colorClass: 'text-orange-400',
       borderClass: 'border-orange-500/50',
-      bgClass: 'bg-orange-500/10',
+      bgClass: 'bg-orange-500/20',
       glowColor: 'rgba(249, 115, 22, 0.45)',
       activeColor: '#F97316',
       icon: Compass,
@@ -106,10 +123,10 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       if (success) {
         // Logged in!
       } else {
-        Alert.alert("Login Failed", "Invalid credentials, please try again.");
+        showCustomAlert("Login Failed", "Invalid credentials, please try again.", 'error');
       }
     } catch (err) {
-      Alert.alert("Error", "An unexpected error occurred.");
+      showCustomAlert("Error", "An unexpected error occurred.", 'error');
     } finally {
       setLoading(false);
     }
@@ -164,7 +181,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               >
                 <View 
                   className={`p-3 rounded-2xl mb-3 flex items-center justify-center border ${
-                    isSelected ? 'bg-white/10 border-transparent' : 'bg-white/5 border-white/15'
+                    isSelected ? 'bg-white/10 border-transparent' : 'bg-white/5 border-white/40'
                   }`}
                 >
                   <IconComponent 
@@ -254,9 +271,64 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <Text className="text-white/80 font-bold text-sm">Explore as Guest</Text>
         </Pressable>
       </View>
+
+      {/* Custom Dialog Alert Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={customAlert.visible}
+        onRequestClose={() => setCustomAlert(prev => ({ ...prev, visible: false }))}
+      >
+        <View style={styles.alertOverlay}>
+          <GlassCard 
+            className="w-full max-w-[340px] p-6 border border-white/10 items-center"
+            glowColor="rgba(79, 70, 229, 0.35)"
+            intensity="high"
+          >
+            {/* Header Icon */}
+            <View className={`w-12 h-12 rounded-2xl mb-4 items-center justify-center ${
+              customAlert.type === 'error' 
+                ? 'bg-red-500/10 border border-red-500/20' 
+                : 'bg-green-500/10 border border-green-500/20'
+            }`}>
+              {customAlert.type === 'error' ? (
+                <AlertTriangle size={24} color="#EF4444" />
+              ) : (
+                <CheckCircle size={24} color="#10B981" />
+              )}
+            </View>
+
+            {/* Title & Message */}
+            <Text className="text-white text-lg font-bold text-center mb-2">
+              {customAlert.title}
+            </Text>
+            <Text className="text-white/60 text-xs text-center leading-relaxed mb-6 px-1">
+              {customAlert.message}
+            </Text>
+
+            {/* Action Button */}
+            <Pressable 
+              onPress={() => setCustomAlert(prev => ({ ...prev, visible: false }))}
+              className="w-full py-3.5 rounded-xl bg-brand-indigo items-center active:scale-95 shadow-md shadow-brand-indigo/30"
+            >
+              <Text className="text-white text-xs font-bold uppercase tracking-wider">Dismiss</Text>
+            </Pressable>
+          </GlassCard>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  alertOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(14, 15, 38, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+});
 
 export default LoginScreen;
 

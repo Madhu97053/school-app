@@ -28,6 +28,7 @@ import LeaveApprovalsScreen from '../screens/super_admin/LeaveApprovalsScreen';
 import SalaryExpensesScreen from '../screens/super_admin/SalaryExpensesScreen';
 import NotificationCenterScreen from '../screens/super_admin/NotificationCenterScreen';
 import PortalToolsScreen from '../screens/super_admin/PortalToolsScreen';
+import AssignFeeStructureScreen from '../screens/super_admin/AssignFeeStructureScreen';
 
 // Admin Staff Screens
 import AdminStaffDashboard from '../screens/admin_staff/AdminStaffDashboard';
@@ -184,6 +185,7 @@ const RoleStackComponent = () => {
       <AppStack.Screen name="FacultyShowcase" component={FacultyShowcaseScreen} />
       <AppStack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} />
       <AppStack.Screen name="StudentProfileDetails" component={ProfileScreen} />
+      <AppStack.Screen name="AssignFeeStructure" component={AssignFeeStructureScreen} />
     </AppStack.Navigator>
   );
 };

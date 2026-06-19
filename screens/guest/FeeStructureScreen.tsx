@@ -1,30 +1,36 @@
-import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Platform, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, Pressable, StyleSheet, Platform, Alert, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Info, ArrowRight, Landmark, CreditCard, Award, Users } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useAuthStore } from '../../store/useAuthStore';
 import { GuestHeader } from '../../components/GuestHeader';
+import { useFeeStore } from '../../store/useFeeStore';
 
 export const FeeStructureScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const logout = useAuthStore((state) => state.logout);
 
-  const feeData = [
-    { grade: 'Class 1', tuition: '$4,500', transport: '$1,200' },
-    { grade: 'Class 2', tuition: '$4,500', transport: '$1,200' },
-    { grade: 'Class 3', tuition: '$4,800', transport: '$1,200' },
-    { grade: 'Class 4', tuition: '$4,800', transport: '$1,200' },
-    { grade: 'Class 5', tuition: '$5,200', transport: '$1,400' },
-    { grade: 'Class 6', tuition: '$5,500', transport: '$1,400' },
-    { grade: 'Class 7', tuition: '$5,500', transport: '$1,400' },
-    { grade: 'Class 8', tuition: '$6,000', transport: '$1,600' },
-    { grade: 'Class 9', tuition: '$6,800', transport: '$1,600' },
-    { grade: 'Class 10', tuition: '$7,200', transport: '$1,600' },
-    { grade: 'Class 11', tuition: '$8,500', transport: '$1,800' },
-    { grade: 'Class 12', tuition: '$9,000', transport: '$1,800' },
-  ];
+  // Read dynamic fee data and active categories from the global store
+  const { categories, feeData } = useFeeStore();
+
+  // Custom alert dialog state
+  const [customAlert, setCustomAlert] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'success',
+  });
+
+  const showCustomAlert = (title: string, message: string, type: 'success' | 'error') => {
+    setCustomAlert({ visible: true, title, message, type });
+  };
 
   const benefits = [
     {
@@ -82,9 +88,16 @@ export const FeeStructureScreen: React.FC = () => {
           <View style={styles.tableContainer}>
             {/* Table Header */}
             <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderText, { flex: 1 }]}>Grade / Class</Text>
-              <Text style={[styles.tableHeaderText, { width: 90, textAlign: 'center' }]}>Tuition Fees</Text>
-              <Text style={[styles.tableHeaderText, { width: 80, textAlign: 'center' }]}>Transport</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1.4 }]}>Grade / Class</Text>
+              {categories.map(cat => (
+                <Text 
+                  key={cat.key} 
+                  style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}
+                  numberOfLines={1}
+                >
+                  {cat.label}
+                </Text>
+              ))}
             </View>
 
             {/* Table Rows */}
@@ -96,9 +109,12 @@ export const FeeStructureScreen: React.FC = () => {
                   idx < feeData.length - 1 && styles.tableRowBorder,
                 ]}
               >
-                <Text style={[styles.tableCell, { flex: 1 }]}>{row.grade}</Text>
-                <Text style={[styles.tableCellValue, { width: 90, textAlign: 'center' }]}>{row.tuition}</Text>
-                <Text style={[styles.tableCellValue, { width: 80, textAlign: 'center' }]}>{row.transport}</Text>
+                <Text style={[styles.tableCell, { flex: 1.4 }]}>{row.grade}</Text>
+                {categories.map(cat => (
+                  <Text key={cat.key} style={[styles.tableCellValue, { flex: 1, textAlign: 'center' }]}>
+                    ${(row.fees[cat.key] || 0).toLocaleString()}
+                  </Text>
+                ))}
               </View>
             ))}
           </View>
@@ -114,7 +130,7 @@ export const FeeStructureScreen: React.FC = () => {
               Our administrative team is available for one-on-one consultations to discuss sibling discounts, installment plans, and scholarship opportunities.
             </Text>
             <Pressable 
-              onPress={() => Alert.alert('Prospectus Download', 'The digital Prospectus & Fee Breakdown PDF has started downloading successfully.')}
+              onPress={() => showCustomAlert('Prospectus Download', 'The digital Prospectus & Fee Breakdown PDF has started downloading successfully.', 'success')}
               style={styles.prospectusButton} 
               className="active:scale-95"
             >
@@ -160,6 +176,51 @@ export const FeeStructureScreen: React.FC = () => {
           <ArrowRight size={16} color="#8ed5ff" />
         </Pressable>
       </BlurView>
+
+      {/* Custom Dialog Alert Modal */}
+      <Modal
+        visible={customAlert.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCustomAlert(prev => ({ ...prev, visible: false }))}
+      >
+        <View style={styles.alertOverlay}>
+          <View 
+            style={styles.alertCard}
+            className="w-[85%] max-w-[340px] p-6 border border-[#8ed5ff]/20 items-center" 
+          >
+            {/* Header Icon */}
+            <View className={`w-12 h-12 rounded-2xl mb-4 items-center justify-center ${
+              customAlert.type === 'error' 
+                ? 'bg-red-500/10 border border-red-500/20' 
+                : 'bg-[#8ed5ff]/10 border border-[#8ed5ff]/20'
+            }`}>
+              {customAlert.type === 'error' ? (
+                <Info size={24} color="#EF4444" />
+              ) : (
+                <Award size={24} color="#8ed5ff" />
+              )}
+            </View>
+
+            {/* Title & Message */}
+            <Text className="text-white text-lg font-bold text-center mb-2">
+              {customAlert.title}
+            </Text>
+            <Text className="text-white/60 text-xs text-center leading-relaxed mb-6 px-1">
+              {customAlert.message}
+            </Text>
+
+            {/* Action Button */}
+            <Pressable 
+              onPress={() => setCustomAlert(prev => ({ ...prev, visible: false }))}
+              style={styles.prospectusButton}
+              className="w-full py-3.5 rounded-xl items-center active:scale-95 shadow-md shadow-[#38bdf8]/30"
+            >
+              <Text className="text-[#004965] font-bold text-xs uppercase tracking-wider">Dismiss</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -168,23 +229,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#101415',
-  },
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    paddingTop: Platform.OS === 'ios' ? 50 : 35,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    zIndex: 50,
-    elevation: 5,
-    backgroundColor: '#1a2a3a',
   },
   scrollContent: {
     paddingTop: Platform.OS === 'ios' ? 100 : 85,
@@ -290,6 +334,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#1a2a3a',
+  },
+  alertOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(16, 20, 21, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  alertCard: {
+    backgroundColor: '#101415',
+    borderRadius: 28,
+    shadowColor: '#8ed5ff',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: Platform.OS === 'android' ? 0 : 8,
   },
 });
 
