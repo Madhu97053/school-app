@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, Platform } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -7,7 +7,7 @@ import { useAuthStore, UserRole } from '../../store/useAuthStore';
 import { CustomInput } from '../../components/CustomInput';
 import { InteractiveButton } from '../../components/InteractiveButton';
 import { GlassCard } from '../../components/GlassCard';
-import { Mail, Lock, CheckCircle } from 'lucide-react-native';
+import { Mail, Lock, CheckCircle, Users, GraduationCap, Briefcase, Shield, Compass } from 'lucide-react-native';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email format" }),
@@ -29,12 +29,74 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
   });
 
-  const rolesList: { role: UserRole; label: string }[] = [
-    { role: 'super_admin', label: 'Super Admin' },
-    { role: 'admin_staff', label: 'Admin Staff' },
-    { role: 'teacher', label: 'Teacher' },
-    { role: 'parent', label: 'Parent' },
-    { role: 'guest', label: 'Guest' },
+  interface RoleConfig {
+    role: UserRole;
+    label: string;
+    description: string;
+    colorClass: string;
+    borderClass: string;
+    bgClass: string;
+    glowColor: string;
+    activeColor: string;
+    icon: React.ComponentType<any>;
+  }
+
+  const rolesConfigs: RoleConfig[] = [
+    {
+      role: 'parent',
+      label: 'Parent',
+      description: 'Student progress & portal',
+      colorClass: 'text-pink-400',
+      borderClass: 'border-pink-500/50',
+      bgClass: 'bg-pink-500/10',
+      glowColor: 'rgba(236, 72, 153, 0.45)',
+      activeColor: '#EC4899',
+      icon: Users,
+    },
+    {
+      role: 'teacher',
+      label: 'Teacher',
+      description: 'Classroom & grading portal',
+      colorClass: 'text-blue-400',
+      borderClass: 'border-blue-500/50',
+      bgClass: 'bg-blue-500/10',
+      glowColor: 'rgba(59, 130, 246, 0.45)',
+      activeColor: '#3B82F6',
+      icon: GraduationCap,
+    },
+    {
+      role: 'admin_staff',
+      label: 'Admin Staff',
+      description: 'Campus ops & finance',
+      colorClass: 'text-emerald-400',
+      borderClass: 'border-emerald-500/50',
+      bgClass: 'bg-emerald-500/10',
+      glowColor: 'rgba(16, 185, 129, 0.45)',
+      activeColor: '#10B981',
+      icon: Briefcase,
+    },
+    {
+      role: 'super_admin',
+      label: 'Super Admin',
+      description: 'Full system configs',
+      colorClass: 'text-purple-400',
+      borderClass: 'border-purple-500/50',
+      bgClass: 'bg-purple-500/10',
+      glowColor: 'rgba(139, 92, 246, 0.45)',
+      activeColor: '#8B5CF6',
+      icon: Shield,
+    },
+    {
+      role: 'guest',
+      label: 'Guest',
+      description: 'Explore the public showcase',
+      colorClass: 'text-orange-400',
+      borderClass: 'border-orange-500/50',
+      bgClass: 'bg-orange-500/10',
+      glowColor: 'rgba(249, 115, 22, 0.45)',
+      activeColor: '#F97316',
+      icon: Compass,
+    },
   ];
 
   const onSubmit = async (data: LoginFormData) => {
@@ -77,21 +139,48 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         
         {/* Role Selector Grid */}
         <View className="flex-row flex-wrap justify-between mb-6">
-          {rolesList.map((item) => (
-            <Pressable
-              key={item.role}
-              onPress={() => setSelectedRole(item.role)}
-              style={{ width: '48%' }}
-              className={`p-3 rounded-xl mb-3 flex-row items-center justify-between border ${
-                selectedRole === item.role
-                  ? 'bg-brand-indigo/35 border-brand-indigo'
-                  : 'bg-white/5 border-white/5'
-              }`}
-            >
-              <Text className="text-white/90 text-sm font-semibold">{item.label}</Text>
-              {selectedRole === item.role && <CheckCircle size={16} color="#10B981" />}
-            </Pressable>
-          ))}
+          {rolesConfigs.map((item) => {
+            const isSelected = selectedRole === item.role;
+            const isFullWidth = item.role === 'guest';
+            const IconComponent = item.icon;
+            
+            return (
+              <Pressable
+                key={item.role}
+                onPress={() => setSelectedRole(item.role)}
+                style={{
+                  width: isFullWidth ? '100%' : '48%',
+                  shadowColor: isSelected ? item.glowColor : 'transparent',
+                  shadowOffset: isSelected ? { width: 0, height: 6 } : { width: 0, height: 0 },
+                  shadowOpacity: isSelected ? 0.45 : 0,
+                  shadowRadius: isSelected ? 12 : 0,
+                  elevation: Platform.OS === 'android' ? 0 : (isSelected ? 6 : 0),
+                }}
+                className={`p-4 rounded-2xl mb-4 flex-col items-center justify-center border transition-all duration-300 ${
+                  isSelected
+                    ? `${item.bgClass} ${item.borderClass}`
+                    : 'bg-black/35 border-white/5'
+                }`}
+              >
+                <View 
+                  className={`p-3 rounded-2xl mb-3 flex items-center justify-center border ${
+                    isSelected ? 'bg-white/10 border-transparent' : 'bg-white/5 border-white/15'
+                  }`}
+                >
+                  <IconComponent 
+                    size={28} 
+                    color={isSelected ? item.activeColor : '#FFFFFF'} 
+                  />
+                </View>
+                <Text className={`text-base font-bold text-center mb-1 ${item.colorClass}`}>
+                  {item.label}
+                </Text>
+                <Text className="text-white/50 text-[11px] text-center font-medium leading-4 px-2">
+                  {item.description}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         {/* Inputs */}
