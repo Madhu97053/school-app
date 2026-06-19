@@ -1,26 +1,28 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Platform, Image, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ChevronLeft, HelpCircle, CheckCircle, Calendar, Info } from 'lucide-react-native';
+import { ArrowRight, CheckCircle, Calendar, FileText, ClipboardList, Building2, FileSignature, GraduationCap } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import { GlassCard } from '../../components/GlassCard';
+import { useAuthStore } from '../../store/useAuthStore';
+import { GuestHeader } from '../../components/GuestHeader';
 
 export const AdmissionsInfoScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const logout = useAuthStore((state) => state.logout);
 
   const steps = [
-    { num: '01', title: 'Enquiry', desc: 'Connect with our counselors to discuss your goals and understand our visionary curriculum.' },
-    { num: '02', title: 'Visit', desc: 'Experience our state-of-the-art campus firsthand with a personalized guided tour.' },
-    { num: '03', title: 'Form', desc: 'Complete our digital-first application process via the integrated EduVision portal.' },
-    { num: '04', title: 'Admission', desc: 'Receive your visionary welcome kit and join our elite community of global learners.' }
+    { num: '01', icon: ClipboardList, title: 'Enquiry', desc: 'Connect with our counselors to discuss your goals and understand our visionary curriculum.' },
+    { num: '02', icon: Building2, title: 'Visit', desc: 'Experience our state-of-the-art campus firsthand with a personalized guided tour.' },
+    { num: '03', icon: FileSignature, title: 'Form', desc: 'Complete our digital-first application process via the integrated EduVision portal.' },
+    { num: '04', icon: GraduationCap, title: 'Admission', desc: 'Receive your visionary welcome kit and join our elite community of global learners.' }
   ];
 
   const eligibility = [
-    { title: 'Academic Excellence', desc: 'Minimum 75% aggregate in prerequisite examinations or international equivalent.' },
-    { title: 'Language Proficiency', desc: 'IELTS 6.5+ or TOEFL iBT 90+ for international non-native English speakers.' },
-    { title: 'Aptitude Testing', desc: 'Successful completion of the EduVision Visionary Thinking Assessment.' },
-    { title: 'Interview Round', desc: 'Holistic review through a digital panel discussion with faculty leads.' }
+    { title: 'Academic Excellence', desc: 'Minimum 75% aggregate in prerequisite examinations or international equivalent.', color: '#8ed5ff' },
+    { title: 'Language Proficiency', desc: 'IELTS 6.5+ or TOEFL iBT 90+ for international non-native English speakers.', color: '#34d399' },
+    { title: 'Aptitude Testing', desc: 'Successful completion of the EduVision Visionary Thinking Assessment.', color: '#fbbf24' },
+    { title: 'Interview Round', desc: 'Holistic review through a digital panel discussion with faculty leads.', color: '#a78bfa' }
   ];
 
   const dates = [
@@ -48,92 +50,135 @@ export const AdmissionsInfoScreen: React.FC = () => {
         style={StyleSheet.absoluteFillObject}
       />
 
-      {/* Top App Bar */}
-      <BlurView intensity={30} tint="dark" style={styles.header}>
-        <View className="flex-row items-center gap-3">
-          <Pressable onPress={() => navigation.goBack()} className="p-1 active:scale-95">
-            <ChevronLeft size={24} color="#8ed5ff" />
-          </Pressable>
-          <Text className="text-xl font-bold text-white font-display-lg">Admissions Info</Text>
-        </View>
-        <Pressable className="p-2 active:scale-95">
-          <HelpCircle size={22} color="#8ed5ff" />
-        </Pressable>
-      </BlurView>
-
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Hero */}
         <View className="px-5 mb-8">
-          <Text className="text-white text-3xl font-extrabold font-display-lg leading-tight mb-3">
-            Join the Future of{"\n"}
-            <Text className="text-[#8ed5ff]">Learning</Text>
+          <Text className="text-white text-3xl font-extrabold leading-tight mb-3">
+            Join the Future of{'\n'}<Text className="text-[#8ed5ff]">Learning</Text>
           </Text>
-          <Text className="text-white/60 text-sm leading-relaxed font-body-lg">
+          <Text className="text-white/60 text-sm leading-relaxed text-center">
             A seamless, visionary admissions journey designed to empower your educational aspirations. From initial inquiry to final enrollment, we guide you every step of the way.
           </Text>
         </View>
 
-        {/* Steps */}
+        {/* The Journey */}
         <View className="px-5 mb-8">
-          <Text className="text-[#8ed5ff] text-xs font-bold uppercase tracking-widest mb-4">The Journey</Text>
+          <View className="flex-row items-center gap-3 mb-5">
+            <View style={styles.dividerLine} />
+            <Text className="text-white/40 text-[10px] font-bold uppercase tracking-[3px]">THE JOURNEY</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
           <View className="gap-4">
-            {steps.map((s, idx) => (
-              <GlassCard key={idx} className="p-5 border border-white/10 flex-row gap-4" intensity="low">
-                <View className="w-10 h-10 rounded-full bg-[#38bdf8]/20 items-center justify-center border border-[#38bdf8]/30">
-                  <Text className="text-[#8ed5ff] font-bold text-sm">{s.num}</Text>
+            {steps.map((s, idx) => {
+              const IconComp = s.icon;
+              return (
+                <View key={idx} style={styles.stepCard}>
+                  {/* Step Number Badge */}
+                  <View style={styles.stepBadge}>
+                    <Text className="text-[#8ed5ff] font-bold text-[10px]">{s.num}</Text>
+                  </View>
+
+                  <View className="mt-4 gap-2">
+                    <View style={styles.stepIconWrap}>
+                      <IconComp size={20} color="rgba(255,255,255,0.5)" />
+                    </View>
+                    <Text className="text-white font-bold text-base">{s.title}</Text>
+                    <Text className="text-white/60 text-xs leading-relaxed">{s.desc}</Text>
+                  </View>
                 </View>
-                <View className="flex-1">
-                  <Text className="text-white font-bold text-base mb-1 font-headline-sm">{s.title}</Text>
-                  <Text className="text-white/60 text-xs leading-relaxed font-body-sm">{s.desc}</Text>
-                </View>
-              </GlassCard>
-            ))}
+              );
+            })}
           </View>
         </View>
 
-        {/* Eligibility & Dates */}
-        <View className="px-5 mb-8 gap-6">
-          <GlassCard className="p-6 border border-white/10" intensity="low">
-            <Text className="text-white font-bold text-lg mb-4 font-headline-md">Eligibility Criteria</Text>
-            <View className="gap-4">
+        {/* Eligibility Criteria */}
+        <View className="px-5 mb-8">
+          <View style={styles.sectionCard}>
+            <Text className="text-white font-bold text-lg mb-5">Eligibility Criteria</Text>
+            <View className="gap-5">
               {eligibility.map((el, idx) => (
-                <View key={idx} className="gap-1 border-b border-white/5 pb-3 last:border-b-0 last:pb-0">
-                  <Text className="text-[#8ed5ff] font-bold text-xs">{el.title}</Text>
-                  <Text className="text-white/60 text-xs font-body-sm leading-relaxed">{el.desc}</Text>
+                <View key={idx} className="flex-row gap-3">
+                  <View style={[styles.eligibilityDot, { backgroundColor: el.color }]} />
+                  <View className="flex-1">
+                    <Text className="text-[#8ed5ff] font-bold text-xs mb-1">{el.title}</Text>
+                    <Text className="text-white/60 text-xs leading-relaxed">{el.desc}</Text>
+                  </View>
                 </View>
               ))}
             </View>
-          </GlassCard>
+          </View>
+        </View>
 
-          <GlassCard className="p-6 border border-[#38bdf8]/30 bg-[#38bdf8]/5" intensity="low">
-            <Text className="text-white font-bold text-lg mb-4 font-headline-md">Critical Dates</Text>
-            <View className="gap-3">
+        {/* Critical Dates */}
+        <View className="px-5 mb-8">
+          <View style={styles.sectionCard}>
+            <Text className="text-white font-bold text-lg mb-4">Critical Dates</Text>
+            <View className="gap-3 mb-5">
               {dates.map((d, idx) => (
-                <View key={idx} className="flex-row justify-between items-center border-b border-white/5 pb-2 last:border-b-0 last:pb-0">
+                <View key={idx} className="flex-row justify-between items-center">
                   <Text className="text-white/60 text-xs">{d.label}</Text>
-                  <Text className="text-[#8ed5ff] font-bold text-xs">{d.date}</Text>
+                  <Text className="text-white/80 font-semibold text-xs">{d.date}</Text>
                 </View>
               ))}
             </View>
-          </GlassCard>
+            <Pressable 
+              onPress={() => Alert.alert('Add to Calendar', 'Key admission timeline events and deadlines have been added to your calendar.')}
+              style={styles.calendarButton} 
+              className="active:scale-95"
+            >
+              <Calendar size={16} color="#8ed5ff" />
+              <Text className="text-[#8ed5ff] font-semibold text-xs ml-2">Add to Calendar</Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* Required Documentation */}
-        <View className="px-5 mb-12">
-          <GlassCard className="p-6 border border-white/10" intensity="low">
-            <Text className="text-white font-bold text-lg mb-2 font-headline-md">Required Documentation</Text>
-            <Text className="text-white/50 text-xs mb-4 font-body-sm">Please ensure high-resolution digital copies of the following are ready for upload.</Text>
-            <View className="gap-3">
+        <View className="px-5 mb-8">
+          <View style={styles.sectionCard}>
+            <Text className="text-white font-bold text-lg mb-2">Required Documentation</Text>
+            <Text className="text-white/50 text-xs mb-5 leading-relaxed">
+              Please ensure high-resolution digital copies of the following are ready for your application portal upload.
+            </Text>
+            <View className="gap-3.5">
               {docs.map((doc, idx) => (
                 <View key={idx} className="flex-row items-center gap-3">
                   <CheckCircle size={16} color="#8ed5ff" />
-                  <Text className="text-white/80 text-xs font-medium font-body-sm">{doc}</Text>
+                  <Text className="text-white/80 text-xs font-medium">{doc}</Text>
                 </View>
               ))}
             </View>
-          </GlassCard>
+
+            {/* Bottom Image */}
+            <View style={styles.docImageWrap} className="mt-6">
+              <Image
+                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBlbOkJML0ZHtBAsgIlDc0SgNZ8cxtHU65dA9vlXDDZN8jzqD6Oj6XmBgPiyvlvoarYwofQc1pOxnFapMfFX0-iwW77dRygkOclMsNajUowpnvBW1-vx1DdWk8m_wk3JNlBoaL_DmEZGYHiZON_xWUdpRoe6FjZlmcH1Zz1tRKG-6yPSOGdM59QCtr10hYXidoNTdd5B3GIC0Mktwph8QwC7WhxmJfxCKHDDFkQtJj_WgXhHrQWU0AJu_lMbXDxmHWC0sUnXQwSStRM' }}
+                style={styles.docImage}
+                resizeMode="cover"
+              />
+            </View>
+          </View>
         </View>
+
+        {/* Bottom spacer for footer */}
+        <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Top App Bar */}
+      <GuestHeader title="Admissions" showBack />
+
+      {/* Floating Footer CTA */}
+      <BlurView intensity={40} tint="dark" style={styles.footer}>
+        <Pressable
+          onPress={() => navigation.navigate('EnquiryForm')}
+          className="flex-row items-center gap-3 px-6 py-3 rounded-full bg-white/10 active:bg-white/20 border border-[#8ed5ff]/30"
+        >
+          <Text className="text-xs font-bold text-[#8ed5ff]">
+            Register to unlock attendance, marks & full features
+          </Text>
+          <ArrowRight size={16} color="#8ed5ff" />
+        </Pressable>
+      </BlurView>
     </View>
   );
 };
@@ -144,6 +189,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#101415',
   },
   header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     paddingTop: Platform.OS === 'ios' ? 50 : 35,
     paddingBottom: 16,
     paddingHorizontal: 16,
@@ -153,10 +202,86 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     zIndex: 50,
+    elevation: 5,
+    backgroundColor: '#1a2a3a',
   },
   scrollContent: {
     paddingTop: Platform.OS === 'ios' ? 100 : 85,
     paddingBottom: 40,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  stepCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    padding: 20,
+  },
+  stepBadge: {
+    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.3)',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    alignSelf: 'flex-start',
+  },
+  stepIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  sectionCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    padding: 24,
+  },
+  eligibilityDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginTop: 4,
+  },
+  calendarButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(142, 213, 255, 0.3)',
+    borderRadius: 12,
+    paddingVertical: 14,
+    backgroundColor: 'rgba(142, 213, 255, 0.05)',
+  },
+  docImageWrap: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  docImage: {
+    width: '100%',
+    height: 160,
+    borderRadius: 16,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 24,
+    borderTopWidth: 1,
+    borderColor: 'rgba(142, 213, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1a2a3a',
   },
 });
 

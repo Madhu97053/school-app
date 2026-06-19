@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Platform, TextInput, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Platform, TextInput, Alert, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ChevronLeft, Send, Sparkles } from 'lucide-react-native';
+import { Send, Zap, ArrowRight, UserPlus } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import { GlassCard } from '../../components/GlassCard';
+import { useAuthStore } from '../../store/useAuthStore';
+import { GuestHeader } from '../../components/GuestHeader';
 
 export const EnquiryFormScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const logout = useAuthStore((state) => state.logout);
   const [parentName, setParentName] = useState('');
   const [mobile, setMobile] = useState('');
   const [childName, setChildName] = useState('');
-  const [grade, setGrade] = useState('Select Grade');
+  const [grade, setGrade] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,11 +33,9 @@ export const EnquiryFormScreen: React.FC = () => {
     }, 1500);
   };
 
-  const grades = [
-    'Grade 1 - Primary',
-    'Grade 6 - Middle',
-    'Grade 9 - High School',
-    'A-Levels / IB DP'
+  const gradeOptions = [
+    'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6',
+    'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'
   ];
 
   return (
@@ -47,107 +47,177 @@ export const EnquiryFormScreen: React.FC = () => {
         style={StyleSheet.absoluteFillObject}
       />
 
-      {/* Top App Bar */}
-      <BlurView intensity={30} tint="dark" style={styles.header}>
-        <View className="flex-row items-center gap-3">
-          <Pressable onPress={() => navigation.goBack()} className="p-1 active:scale-95">
-            <ChevronLeft size={24} color="#8ed5ff" />
-          </Pressable>
-          <Text className="text-xl font-bold text-white font-display-lg">New Enquiry</Text>
-        </View>
-        <Sparkles size={20} color="#8ed5ff" />
-      </BlurView>
-
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Title */}
         <View className="px-5 mb-6">
-          <Text className="text-white text-3xl font-extrabold font-display-lg leading-tight mb-2">
-            Begin Your <Text className="text-[#8ed5ff]">Visionary</Text> Journey
+          <Text className="text-white text-3xl font-extrabold leading-tight mb-3">
+            Begin Your <Text className="text-[#8ed5ff]">Visionary</Text>{'\n'}Journey.
           </Text>
-          <Text className="text-white/60 text-sm font-body-lg leading-relaxed">
+          <Text className="text-white/60 text-sm leading-relaxed">
             Join an elite community of learners. Fill out the enquiry form below, and our admissions office will guide you through the next steps.
           </Text>
         </View>
 
+        {/* Priority Processing Banner */}
+        <View className="px-5 mb-6">
+          <View style={styles.priorityBanner}>
+            <View style={styles.priorityIconWrap}>
+              <Zap size={18} color="#8ed5ff" />
+            </View>
+            <View className="flex-1 ml-3">
+              <Text className="text-white font-bold text-sm mb-0.5">Priority Processing</Text>
+              <Text className="text-white/60 text-xs">Enquiries are reviewed within 24 hours.</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Form */}
         <View className="px-5 mb-8">
-          <GlassCard className="p-6 border border-white/10 gap-5" intensity="low">
-            <View className="gap-1.5">
-              <Text className="text-white/60 text-[10px] font-bold uppercase tracking-widest ml-1 font-label-md">Parent Name</Text>
+          <View style={styles.formCard}>
+            {/* Parent Name */}
+            <View className="gap-2">
+              <Text style={styles.fieldLabel}>PARENT NAME</Text>
               <TextInput
                 value={parentName}
                 onChangeText={setParentName}
-                placeholder="e.g. John Doe"
-                placeholderTextColor="rgba(255,255,255,0.3)"
-                className="w-full bg-white/5 border border-white/10 px-4 py-3.5 rounded-xl text-white font-body-md text-sm"
+                placeholder="John Doe"
+                placeholderTextColor="rgba(0,0,0,0.35)"
+                style={styles.inputField}
               />
             </View>
 
-            <View className="gap-1.5">
-              <Text className="text-white/60 text-[10px] font-bold uppercase tracking-widest ml-1 font-label-md">Mobile Number</Text>
+            {/* Mobile Number */}
+            <View className="gap-2">
+              <Text style={styles.fieldLabel}>MOBILE NUMBER</Text>
               <TextInput
                 value={mobile}
                 onChangeText={setMobile}
-                placeholder="e.g. +1 (555) 000-0000"
-                placeholderTextColor="rgba(255,255,255,0.3)"
+                placeholder="+1 (555) 000-0000"
+                placeholderTextColor="rgba(0,0,0,0.35)"
                 keyboardType="phone-pad"
-                className="w-full bg-white/5 border border-white/10 px-4 py-3.5 rounded-xl text-white font-body-md text-sm"
+                style={styles.inputField}
               />
             </View>
 
-            <View className="gap-1.5">
-              <Text className="text-white/60 text-[10px] font-bold uppercase tracking-widest ml-1 font-label-md">Child Name</Text>
+            {/* Child Name */}
+            <View className="gap-2">
+              <Text style={styles.fieldLabel}>CHILD NAME</Text>
               <TextInput
                 value={childName}
                 onChangeText={setChildName}
-                placeholder="e.g. Jane Doe"
-                placeholderTextColor="rgba(255,255,255,0.3)"
-                className="w-full bg-white/5 border border-white/10 px-4 py-3.5 rounded-xl text-white font-body-md text-sm"
+                placeholder="Jane Doe"
+                placeholderTextColor="rgba(0,0,0,0.35)"
+                style={styles.inputField}
               />
             </View>
 
-            <View className="gap-1.5">
-              <Text className="text-white/60 text-[10px] font-bold uppercase tracking-widest ml-1 font-label-md">Class Applying For</Text>
-              <View className="flex-row flex-wrap gap-2">
-                {grades.map((g) => (
+            {/* Class Applying For */}
+            <View className="gap-2">
+              <Text style={styles.fieldLabel}>CLASS APPLYING FOR</Text>
+              <View className="flex-row flex-wrap gap-2 mt-1">
+                {gradeOptions.map((g) => (
                   <Pressable
                     key={g}
                     onPress={() => setGrade(g)}
-                    className={`px-4 py-2.5 rounded-xl border ${
-                      grade === g ? 'bg-[#38bdf8] border-[#38bdf8]' : 'bg-white/5 border-white/10'
-                    }`}
+                    style={[
+                      styles.gradeChip,
+                      grade === g && styles.gradeChipActive
+                    ]}
+                    className="active:scale-95"
                   >
-                    <Text className={`text-xs font-semibold ${grade === g ? 'text-[#004965]' : 'text-white/60'}`}>{g}</Text>
+                    <Text
+                      style={[
+                        styles.gradeChipText,
+                        grade === g && styles.gradeChipTextActive
+                      ]}
+                    >
+                      {g}
+                    </Text>
                   </Pressable>
                 ))}
               </View>
             </View>
 
-            <View className="gap-1.5">
-              <Text className="text-white/60 text-[10px] font-bold uppercase tracking-widest ml-1 font-label-md">Message</Text>
+            {/* Message */}
+            <View className="gap-2">
+              <Text style={styles.fieldLabel}>MESSAGE</Text>
               <TextInput
                 value={message}
                 onChangeText={setMessage}
                 placeholder="Any specific requirements or questions..."
-                placeholderTextColor="rgba(255,255,255,0.3)"
+                placeholderTextColor="rgba(0,0,0,0.35)"
                 multiline
                 numberOfLines={4}
-                style={{ textAlignVertical: 'top' }}
-                className="w-full bg-white/5 border border-white/10 px-4 py-3.5 rounded-xl text-white font-body-md text-sm"
+                style={[styles.inputField, styles.textArea]}
               />
             </View>
 
+            {/* Submit Button */}
             <Pressable
               onPress={handleSubmit}
               disabled={isSubmitting}
-              className="bg-[#38bdf8] w-full py-4 rounded-xl items-center justify-center flex-row gap-2 active:scale-95 mt-2 shadow-[0_0_16px_rgba(56,189,248,0.4)]"
+              style={styles.submitButton}
+              className="active:scale-95"
             >
-              <Text className="text-[#004965] font-bold text-sm font-label-lg">
+              <Text className="text-[#004965] font-bold text-sm">
                 {isSubmitting ? 'Sending...' : 'Submit Enquiry'}
               </Text>
               <Send size={16} color="#004965" />
             </Pressable>
-          </GlassCard>
+
+            {/* Create Parent Account */}
+            <Pressable
+              onPress={() => logout()}
+              style={styles.secondaryButton}
+              className="active:scale-95"
+            >
+              <Text className="text-[#8ed5ff] font-semibold text-sm">Create Parent Account</Text>
+            </Pressable>
+          </View>
         </View>
+
+        {/* Bottom Section - Shaping Future Leaders */}
+        <View className="mb-8">
+          <View style={styles.bottomImageWrap}>
+            <Image
+              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA9k2qrRKn6EjnwySdK8mvWGIpe-XMCT6PjXLgtiDE5O-zAs0M728KjEs2lEYzwC_UZJsD8w8Zzwmv_XflmUM8_AEnEGLAU4ferUD-PhSHAKJrd4_pJmBpBbkPgAtPLtwCyeFJJVMwOVLT0h2ecFRef8MHSXHhVUwFTucejkwH3ax5o4O36r1cvDPie5aQEMrhgPBFBl5H8p8uI8Ymb-rszmCJuKbQvR_KHb4oTXqQNDjh6RNFwtQ21EZndWWRkXCz79yeZzQ6KHK7s' }}
+              style={styles.bottomImage}
+              resizeMode="cover"
+            />
+            <LinearGradient
+              colors={['transparent', 'rgba(16,20,21,0.85)', '#101415']}
+              style={StyleSheet.absoluteFillObject}
+            />
+          </View>
+          <View className="px-5 -mt-24">
+            <Text className="text-white text-2xl font-extrabold leading-tight mb-2">
+              Shaping Future{'\n'}Leaders
+            </Text>
+            <Text className="text-white/60 text-sm leading-relaxed">
+              Our campus blends traditional academic rigor with cutting-edge technological infrastructure.
+            </Text>
+          </View>
+        </View>
+
+        {/* Bottom spacer for footer */}
+        <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Top App Bar */}
+      <GuestHeader title="Admission Enquiry" showBack />
+
+      {/* Floating Footer CTA */}
+      <BlurView intensity={40} tint="dark" style={styles.footer}>
+        <Pressable
+          onPress={() => logout()}
+          className="flex-row items-center gap-3 px-6 py-3 rounded-full bg-white/10 active:bg-white/20 border border-[#8ed5ff]/30"
+        >
+          <Text className="text-xs font-bold text-[#8ed5ff]">
+            Register to unlock attendance, marks & full features
+          </Text>
+          <ArrowRight size={16} color="#8ed5ff" />
+        </Pressable>
+      </BlurView>
     </View>
   );
 };
@@ -158,6 +228,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#101415',
   },
   header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     paddingTop: Platform.OS === 'ios' ? 50 : 35,
     paddingBottom: 16,
     paddingHorizontal: 16,
@@ -167,10 +241,127 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     zIndex: 50,
+    elevation: 5,
+    backgroundColor: '#1a2a3a',
   },
   scrollContent: {
     paddingTop: Platform.OS === 'ios' ? 100 : 85,
     paddingBottom: 40,
+  },
+  priorityBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    padding: 18,
+  },
+  priorityIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(142, 213, 255, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(142, 213, 255, 0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  formCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    padding: 24,
+    gap: 20,
+  },
+  fieldLabel: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2,
+    marginLeft: 2,
+  },
+  inputField: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 14,
+    color: '#1a1a2e',
+  },
+  selectField: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  gradeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  gradeChipActive: {
+    backgroundColor: '#38bdf8',
+    borderColor: '#38bdf8',
+  },
+  gradeChipText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  gradeChipTextActive: {
+    color: '#004965',
+    fontWeight: '700',
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  submitButton: {
+    backgroundColor: '#38bdf8',
+    borderRadius: 12,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
+  secondaryButton: {
+    borderWidth: 1,
+    borderColor: 'rgba(142, 213, 255, 0.3)',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(142, 213, 255, 0.05)',
+  },
+  bottomImageWrap: {
+    width: '100%',
+    height: 200,
+    overflow: 'hidden',
+  },
+  bottomImage: {
+    width: '100%',
+    height: '100%',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 24,
+    borderTopWidth: 1,
+    borderColor: 'rgba(142, 213, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1a2a3a',
   },
 });
 

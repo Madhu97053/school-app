@@ -64,7 +64,8 @@ import SchoolFacilitiesScreen from '../screens/guest/SchoolFacilitiesScreen';
 import AchievementsGalleryScreen from '../screens/guest/AchievementsGalleryScreen';
 import FeeStructureScreen from '../screens/guest/FeeStructureScreen';
 
-const Stack = createNativeStackNavigator();
+const RootStack = createNativeStackNavigator();
+const AppStack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const getTabOptions = (icon: any, activeColor: string, title?: string) => ({
@@ -151,39 +152,39 @@ const RoleStackComponent = () => {
   }
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
-      <Stack.Screen name={initialRoute} component={mainComponent} />
+    <AppStack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
+      <AppStack.Screen name={initialRoute} component={mainComponent} />
       {/* Remaining Feature Screens */}
-      <Stack.Screen name="FeePayment" component={FeePaymentScreen} />
-      <Stack.Screen name="ReportCard" component={ReportCardScreen} />
-      <Stack.Screen name="BusTracking" component={BusTrackingScreen} />
-      <Stack.Screen name="Messaging" component={MessagingScreen} />
-      <Stack.Screen name="TeacherCommunication" component={MessagingScreen} />
-      <Stack.Screen name="EnquiryLeads" component={EnquiryLeadsScreen} />
-      <Stack.Screen name="StudentPerformance" component={StudentPerformanceScreen} />
-      <Stack.Screen name="SubstitutionManagement" component={SubstitutionManagementScreen} />
-      <Stack.Screen name="LeaveApplication" component={LeaveApplicationScreen} />
-      <Stack.Screen name="AnalyticsDashboard" component={AnalyticsDashboardScreen} />
-      <Stack.Screen name="DailyDiary" component={DailyDiaryScreen} />
-      <Stack.Screen name="HomeworkAssignments" component={HomeworkAssignmentsScreen} />
-      <Stack.Screen name="AdmissionsInfo" component={AdmissionsInfoScreen} />
-      <Stack.Screen name="AchievementsGallery" component={AchievementsGalleryScreen} />
-      <Stack.Screen name="FeeCollection" component={FeeCollectionScreen} />
-      <Stack.Screen name="FeeStructure" component={FeeStructureScreen} />
-      <Stack.Screen name="EnquiryForm" component={EnquiryFormScreen} />
-      <Stack.Screen name="TimetableBuilder" component={TimetableBuilderScreen} />
-      <Stack.Screen name="SchoolFacilities" component={SchoolFacilitiesScreen} />
-      <Stack.Screen name="AttendanceMarking" component={AttendanceMarkingScreen} />
-      <Stack.Screen name="MarksEntry" component={MarksEntryScreen} />
-      <Stack.Screen name="UserManagement" component={UserManagementScreen} />
-      <Stack.Screen name="LeaveApprovals" component={LeaveApprovalsScreen} />
-      <Stack.Screen name="ExamSchedule" component={ExamScheduleScreen} />
-      <Stack.Screen name="SalaryExpenses" component={SalaryExpensesScreen} />
-      <Stack.Screen name="PortalTools" component={PortalToolsScreen} />
-      <Stack.Screen name="FacultyShowcase" component={FacultyShowcaseScreen} />
-      <Stack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} />
-      <Stack.Screen name="StudentProfileDetails" component={ProfileScreen} />
-    </Stack.Navigator>
+      <AppStack.Screen name="FeePayment" component={FeePaymentScreen} />
+      <AppStack.Screen name="ReportCard" component={ReportCardScreen} />
+      <AppStack.Screen name="BusTracking" component={BusTrackingScreen} />
+      <AppStack.Screen name="Messaging" component={MessagingScreen} />
+      <AppStack.Screen name="TeacherCommunication" component={MessagingScreen} />
+      <AppStack.Screen name="EnquiryLeads" component={EnquiryLeadsScreen} />
+      <AppStack.Screen name="StudentPerformance" component={StudentPerformanceScreen} />
+      <AppStack.Screen name="SubstitutionManagement" component={SubstitutionManagementScreen} />
+      <AppStack.Screen name="LeaveApplication" component={LeaveApplicationScreen} />
+      <AppStack.Screen name="AnalyticsDashboard" component={AnalyticsDashboardScreen} />
+      <AppStack.Screen name="DailyDiary" component={DailyDiaryScreen} />
+      <AppStack.Screen name="HomeworkAssignments" component={HomeworkAssignmentsScreen} />
+      <AppStack.Screen name="AdmissionsInfo" component={AdmissionsInfoScreen} />
+      <AppStack.Screen name="AchievementsGallery" component={AchievementsGalleryScreen} />
+      <AppStack.Screen name="FeeCollection" component={FeeCollectionScreen} />
+      <AppStack.Screen name="FeeStructure" component={FeeStructureScreen} />
+      <AppStack.Screen name="EnquiryForm" component={EnquiryFormScreen} />
+      <AppStack.Screen name="TimetableBuilder" component={TimetableBuilderScreen} />
+      <AppStack.Screen name="SchoolFacilities" component={SchoolFacilitiesScreen} />
+      <AppStack.Screen name="AttendanceMarking" component={AttendanceMarkingScreen} />
+      <AppStack.Screen name="MarksEntry" component={MarksEntryScreen} />
+      <AppStack.Screen name="UserManagement" component={UserManagementScreen} />
+      <AppStack.Screen name="LeaveApprovals" component={LeaveApprovalsScreen} />
+      <AppStack.Screen name="ExamSchedule" component={ExamScheduleScreen} />
+      <AppStack.Screen name="SalaryExpenses" component={SalaryExpensesScreen} />
+      <AppStack.Screen name="PortalTools" component={PortalToolsScreen} />
+      <AppStack.Screen name="FacultyShowcase" component={FacultyShowcaseScreen} />
+      <AppStack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} />
+      <AppStack.Screen name="StudentProfileDetails" component={ProfileScreen} />
+    </AppStack.Navigator>
   );
 };
 
@@ -192,19 +193,19 @@ export const AppNavigator: React.FC = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {!isAuthenticated ? (
           <>
-            <Stack.Screen name="Splash" component={SplashScreen} />
-            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-            <Stack.Screen name="OTPVerify" component={OTPVerifyScreen} />
+            <RootStack.Screen name="Splash" component={SplashScreen} />
+            <RootStack.Screen name="Onboarding" component={OnboardingScreen} />
+            <RootStack.Screen name="Login" component={LoginScreen} />
+            <RootStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <RootStack.Screen name="OTPVerify" component={OTPVerifyScreen} />
           </>
         ) : (
-          <Stack.Screen name="AppHome" component={RoleStackComponent} />
+          <RootStack.Screen name="AppHome" component={RoleStackComponent} />
         )}
-      </Stack.Navigator>
+      </RootStack.Navigator>
     </NavigationContainer>
   );
 };

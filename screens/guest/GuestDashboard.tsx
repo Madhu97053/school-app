@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, Image, Dimensions, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { School, HelpCircle, ArrowRight, CheckCircle, GraduationCap } from 'lucide-react-native';
+import { ArrowRight, CheckCircle, GraduationCap } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { GlassCard } from '../../components/GlassCard';
+import { useAuthStore } from '../../store/useAuthStore';
+import { GuestHeader } from '../../components/GuestHeader';
 
 const { width, height } = Dimensions.get('window');
 
 export const GuestDashboard: React.FC = () => {
   const navigation = useNavigation<any>();
+  const logout = useAuthStore((state) => state.logout);
   const [activeChip, setActiveChip] = useState('Overview');
 
   const chips = [
@@ -46,30 +49,25 @@ export const GuestDashboard: React.FC = () => {
       />
 
       {/* Decorative Glow */}
-      <View style={styles.glowTopLeft} pointerEvents="none" />
-      <View style={styles.glowBottomRight} pointerEvents="none" />
+      {Platform.OS === 'ios' && (
+        <>
+          <View style={styles.glowTopLeft} pointerEvents="none" />
+          <View style={styles.glowBottomRight} pointerEvents="none" />
+        </>
+      )}
 
       {/* Top App Bar */}
-      <BlurView intensity={30} tint="dark" style={styles.header}>
-        <View className="flex-row items-center gap-3">
-          <School size={28} color="#8ed5ff" />
-          <Text className="text-xl font-bold text-[#e0e3e5] font-display-lg">EduVision</Text>
-        </View>
-        <View className="flex-row items-center gap-4">
-          <Pressable 
-            onPress={() => navigation.navigate('AdmissionsInfo')}
-            className="p-2 active:scale-95 hover:bg-white/10 rounded-full"
-          >
-            <HelpCircle size={22} color="#8ed5ff" />
-          </Pressable>
+      <GuestHeader 
+        title="EduVision" 
+        rightAction={
           <Pressable 
             onPress={() => navigation.navigate('EnquiryForm')}
             className="bg-[#38bdf8] px-5 py-2.5 rounded-full active:scale-95 shadow-[0_0_16px_rgba(56,189,248,0.4)]"
           >
             <Text className="text-[#004965] font-semibold text-xs font-label-lg">Apply Now</Text>
           </Pressable>
-        </View>
-      </BlurView>
+        }
+      />
 
       <ScrollView 
         contentContainerStyle={styles.scrollContent} 
@@ -120,6 +118,16 @@ export const GuestDashboard: React.FC = () => {
                 <Text className="text-white font-semibold text-xs font-label-lg">Download Prospectus</Text>
               </Pressable>
             </View>
+
+            {/* Know About Our Expert Faculty Button */}
+            <Pressable
+              onPress={() => navigation.navigate('FacultyShowcase')}
+              style={styles.facultyButton}
+              className="active:scale-95"
+            >
+              <GraduationCap size={15} color="#8ed5ff" />
+              <Text className="text-[#8ed5ff] font-semibold text-xs ml-2 font-label-lg">Know About Our Expert Faculty</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -162,12 +170,26 @@ export const GuestDashboard: React.FC = () => {
 
         {/* Stats Strip */}
         <View className="px-5 mb-8">
-          <View className="flex-row flex-wrap justify-between gap-4">
-            {stats.map((stat, idx) => (
-              <GlassCard key={idx} className="w-[47%] p-5 items-center justify-center border border-white/10" intensity="low">
-                <Text className="text-[#8ed5ff] text-2xl font-bold font-display-lg mb-1">{stat.value}</Text>
-                <Text className="text-white/50 text-[10px] font-semibold text-center font-label-lg uppercase tracking-wider">{stat.label}</Text>
-              </GlassCard>
+          <View style={styles.statsGrid}>
+            {[
+              { value: '1,200', label: 'Global Students', glow: '#38bdf8', text: '#8ed5ff' },
+              { value: '68',    label: 'Expert Faculty',  glow: '#a78bfa', text: '#c4b5fd' },
+              { value: '94%',   label: 'Board Results',   glow: '#34d399', text: '#6ee7b7' },
+              { value: '25',    label: 'Legacy Years',    glow: '#f59e0b', text: '#fcd34d' },
+            ].map((stat, idx) => (
+              <View
+                key={idx}
+                style={[
+                  styles.statCard,
+                  {
+                    shadowColor: stat.glow,
+                    borderColor: stat.glow + '55', // ~33% opacity border tint
+                  }
+                ]}
+              >
+                <Text style={[styles.statValue, { color: stat.text }]}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+              </View>
             ))}
           </View>
         </View>
@@ -210,7 +232,7 @@ export const GuestDashboard: React.FC = () => {
       {/* Floating Footer to Login */}
       <BlurView intensity={40} tint="dark" style={styles.footer}>
         <Pressable 
-          onPress={() => navigation.navigate('Login')}
+          onPress={() => navigation.navigate('EnquiryForm')}
           className="flex-row items-center gap-3 px-6 py-3 rounded-full bg-white/10 active:bg-white/20 border border-[#8ed5ff]/30 shadow-[0_0_20px_rgba(142,213,255,0.2)]"
         >
           <Text className="text-xs font-bold text-[#8ed5ff] font-label-lg">
@@ -262,9 +284,22 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     zIndex: 50,
+    backgroundColor: '#1a2a3a',
   },
   scrollContent: {
     paddingTop: Platform.OS === 'ios' ? 100 : 85,
+  },
+  facultyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(142, 213, 255, 0.35)',
+    borderRadius: 12,
+    paddingVertical: 11,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(142, 213, 255, 0.07)',
+    marginTop: 10,
   },
   secondaryButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
@@ -274,6 +309,40 @@ const styles = StyleSheet.create({
   chipsContainer: {
     paddingHorizontal: 20,
     paddingVertical: 4,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  statCard: {
+    width: '47%',
+    paddingVertical: 22,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    borderWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    marginBottom: 14,
+    // iOS-only glow shadow (no elevation — Android elevation always casts black)
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 18,
+  },
+  statValue: {
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.45)',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    textAlign: 'center',
   },
   footer: {
     position: 'absolute',
@@ -285,6 +354,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(142, 213, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#1a2a3a',
   },
 });
 
