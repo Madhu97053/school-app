@@ -80,26 +80,26 @@ export const GuestHeader: React.FC<GuestHeaderProps> = ({ title, showBack = fals
       >
         {/* Backdrop */}
         <Pressable style={styles.modalOverlay} onPress={() => setMenuVisible(false)}>
-          {/* Menu panel — onPress stops backdrop from closing */}
+          {/* Menu panel — stop propagation so taps inside don't close modal */}
           <Pressable
             style={[styles.menuContainer, { top: insets.top + 60 }]}
             onPress={() => {}}
           >
-            {/* Layer 1: BlurView — same intensity as bus card */}
-            <BlurView intensity={95} tint="dark" style={StyleSheet.absoluteFillObject} />
+            {/* Layer 1: Dark blur base matching guest screen tone */}
+            <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFillObject} />
 
-            {/* Layer 2: Horizontal glow gradient — purple→transparent→sky (bus card uses purple/green, here adapted to sky) */}
+            {/* Layer 2: Sky-blue top glow — matches guest header/stat card accents */}
             <LinearGradient
-              colors={['rgba(94, 92, 230, 0.22)', 'rgba(16, 20, 21, 0)', 'rgba(56, 189, 248, 0.20)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
+              colors={['rgba(56, 189, 248, 0.18)', 'rgba(13, 27, 42, 0)', 'rgba(13, 27, 42, 0)']}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
               style={StyleSheet.absoluteFillObject}
               pointerEvents="none"
             />
 
-            {/* Layer 3: Frosted glass highlight from top-left */}
+            {/* Layer 3: Subtle diagonal specular sheen */}
             <LinearGradient
-              colors={['rgba(255,255,255,0.12)', 'rgba(255,255,255,0.04)', 'rgba(255,255,255,0.01)']}
+              colors={['rgba(142, 213, 255, 0.07)', 'rgba(142, 213, 255, 0)', 'rgba(142, 213, 255, 0)']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFillObject}
@@ -215,18 +215,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     width: 235,
-    borderRadius: 24,
+    borderRadius: 22,
     overflow: 'hidden',
     borderWidth: 1,
-    // Bus card border
-    borderColor: 'rgba(255, 255, 255, 0.40)',
-    // Bus card background tint
-    backgroundColor: 'rgba(255, 255, 255, 0.30)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.35,
-    shadowRadius: 24,
-    elevation: 16,
+    // Dark navy matching guest header + sky-blue accent border
+    borderColor: 'rgba(56, 189, 248, 0.28)',
+    // Same dark navy as guest header (#1a2a3a) with slight transparency
+    backgroundColor: 'rgba(13, 27, 42, 0.92)',
+    shadowColor: '#38bdf8',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 12,
   },
   menuContent: {
     paddingBottom: 4,

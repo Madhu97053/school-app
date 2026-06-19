@@ -169,26 +169,39 @@ export const GuestDashboard: React.FC = () => {
         </View>
 
         {/* Stats Strip */}
-        <View className="px-5 mb-8">
+        <View style={styles.statsStrip}>
           <View style={styles.statsGrid}>
             {[
-              { value: '1,200', label: 'Global Students', glow: '#38bdf8', text: '#8ed5ff' },
-              { value: '68',    label: 'Expert Faculty',  glow: '#a78bfa', text: '#c4b5fd' },
-              { value: '94%',   label: 'Board Results',   glow: '#34d399', text: '#6ee7b7' },
-              { value: '25',    label: 'Legacy Years',    glow: '#f59e0b', text: '#fcd34d' },
+              { value: '1,200', label: 'Global Students', text: '#8ed5ff' },
+              { value: '68',    label: 'Expert Faculty',  text: '#c4b5fd' },
+              { value: '94%',   label: 'Board Results',   text: '#6ee7b7' },
+              { value: '25',    label: 'Legacy Years',    text: '#fcd34d' },
             ].map((stat, idx) => (
-              <View
-                key={idx}
-                style={[
-                  styles.statCard,
-                  {
-                    shadowColor: stat.glow,
-                    borderColor: stat.glow + '55', // ~33% opacity border tint
-                  }
-                ]}
-              >
-                <Text style={[styles.statValue, { color: stat.text }]}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
+              <View key={idx} style={styles.statGlowWrapper}>
+                {/* === Exact same glass recipe as the dropdown === */}
+                {/* Layer 1: Dark blur base */}
+                <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFillObject} />
+                {/* Layer 2: Sky-blue top glow */}
+                <LinearGradient
+                  colors={['rgba(56, 189, 248, 0.22)', 'rgba(13, 27, 42, 0)', 'rgba(13, 27, 42, 0)']}
+                  start={{ x: 0.5, y: 0 }}
+                  end={{ x: 0.5, y: 1 }}
+                  style={StyleSheet.absoluteFillObject}
+                  pointerEvents="none"
+                />
+                {/* Layer 3: Diagonal specular sheen */}
+                <LinearGradient
+                  colors={['rgba(142, 213, 255, 0.10)', 'rgba(142, 213, 255, 0)', 'rgba(142, 213, 255, 0)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFillObject}
+                  pointerEvents="none"
+                />
+                {/* Content */}
+                <View style={styles.statCardContent}>
+                  <Text style={[styles.statValue, { color: stat.text }]}>{stat.value}</Text>
+                  <Text style={styles.statLabel}>{stat.label}</Text>
+                </View>
               </View>
             ))}
           </View>
@@ -310,25 +323,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 4,
   },
+  statsStrip: {
+    paddingHorizontal: 20,
+    marginBottom: 32,
+    // Extra padding so glow shadow isn't cut off at edges
+    paddingVertical: 8,
+  },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  statCard: {
+  // Card container — same style as dropdown menuContainer
+  statGlowWrapper: {
     width: '47%',
+    marginBottom: 14,
+    borderRadius: 22,
+    overflow: 'hidden',               // clips BlurView + gradients to rounded corners
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.28)',   // same as dropdown
+    backgroundColor: 'rgba(13, 27, 42, 0.92)', // same dark navy as dropdown
+    // iOS shadow — colored glow
+    shadowColor: '#38bdf8',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.55,
+    shadowRadius: 16,
+    elevation: 0, // keep 0 — Android elevation always casts black
+  },
+  // Transparent content layer that sits above the glass layers
+  statCardContent: {
     paddingVertical: 22,
     paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
-    borderWidth: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    marginBottom: 14,
-    // iOS-only glow shadow (no elevation — Android elevation always casts black)
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 18,
   },
   statValue: {
     fontSize: 26,
